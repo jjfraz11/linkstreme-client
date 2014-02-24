@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+  "name": "Linkstreme Client (Chrome)",
+  "version": "0.0.1",
+
+  "description": "Discover. Collect. Share.",
+  // "icons": { },
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+
+  "author": "Jonathan Frazier"
+}
