@@ -9,5 +9,7 @@
     "default_popup": "popup.html"
   },
 
-  "author": "Jonathan Frazier"
+  "author": "Jonathan Frazier",
+
+  "permissions": [ "http://*/", "https://*/" ]
 }
