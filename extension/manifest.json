@@ -6,10 +6,15 @@
   "description": "Discover. Collect. Share.",
   // "icons": { },
   "browser_action": {
-    "default_popup": "popup.html"
+    "default_popup": "app/popup/main.html"
   },
 
   "author": "Jonathan Frazier",
 
-  "permissions": [ "http://*/", "https://*/" ]
+  "permissions": [
+    "tabs",
+
+    "http://*/",
+    "https://*/"
+    ]
 }
