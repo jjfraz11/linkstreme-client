@@ -1,27 +1,28 @@
 <html>
- <head>
-   <title>Linkstreme Client</title>
-   <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" rel="stylesheet">
-   <!-- <link rel="stylesheet" href="vendor/css/bootstrap.min.css" /> -->
- </head>
- <body>
-   <div ng-app="popupApp">
-     <div class="btn-group">
-       <button type="button" class="btn btn-default">Discover</button>
-       <button type="button" class="btn btn-default">Collect</button>
-       <button type="button" class="btn btn-default">Share</button>
-     </div>
-     <div ng-controller="collectController">
-       {{ url }}
-     </div>
-     <div ng-controller="shareController">
-       {{ url }}
-     </div>
-   </div>
+  <head>
+    <title>Linkstreme Client</title>
+    <link rel="stylesheet" href="/vendor/css/bootstrap-combined.min.css" />
+  </head>
 
-   <script type="text/javascript" src="app/js/popup.js"></script>
-   <script type="text/javascript" src="vendor/js/angular.min.js"></script>
-   <script type="text/javascript" src="vendor/js/bootstrap.min.js"></script>
-   <script type="text/javascript" src="vendor/js/ui-bootstrap-tpls-0.10.0.min.js"></script>
- </body>
+  <body>
+    <div ng-app="popupApp">
+      <div class="btn-group">
+        <button type="button" class="btn btn-default">Discover</button>
+        <button type="button" class="btn btn-default">Collect</button>
+        <button type="button" class="btn btn-default">Share</button>
+      </div>
+      <div ng-controller="collectController">
+        {{ url }} - {{ data }}
+      </div>
+      <div ng-controller="shareController">
+        {{ url }}
+      </div>
+    </div>
+
+    <script type="text/javascript" src="/vendor/js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="/vendor/js/angular.min.js"></script>
+    <script type="text/javascript" src="/vendor/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/vendor/js/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+  </body>
 </html>

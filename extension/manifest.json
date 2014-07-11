@@ -1,20 +1,22 @@
 {
-  "manifest_version": 2,
-  "name": "Linkstreme Client (Chrome)",
-  "version": "0.0.1",
+    "manifest_version": 2,
+    "name": "Linkstreme Client (Chrome)",
+    "version": "0.0.1",
 
-  "description": "Discover. Collect. Share.",
-  // "icons": { },
-  "browser_action": {
-    "default_popup": "app/popup/main.html"
-  },
+    "description": "Discover. Collect. Share.",
+    // "icons": { },
+    "browser_action": {
+	"default_popup": "app/popup/main.html"
+    },
 
-  "author": "Jonathan Frazier",
+    "author": "Jonathan Frazier",
 
-  "permissions": [
-    "tabs",
+    "permissions": [
+	"storage", // Needed to use Chrome Storage API
+	"tabs",    // Needed to access info on current tabs
+	"unlimitedStorage", // Needed to allow unlimited persistence for IndexedDB
 
-    "http://*/",
-    "https://*/"
+	"http://*/",
+	"https://*/"
     ]
 }
