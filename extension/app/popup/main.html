@@ -12,7 +12,11 @@
         <button type="button" class="btn btn-default">Share</button>
       </div>
       <div ng-controller="collectController">
-        {{ url }} - {{ data }}
+        Current: {{ currentTab.url }}
+        <div ng-repeat="tab in activeTabs">
+          {{ tab.index }} - {{ tab.title }}
+          {{ tab.url }}
+        </div>
       </div>
       <div ng-controller="shareController">
         {{ url }}

@@ -1,34 +1,39 @@
 (function(){
   angular.module('popupApp', []).
     controller('discoverController', [ '$scope', discoverController ]).
-    controller('collectController', [ '$scope', 'indexDB', collectController ]).
+    controller('collectController', [ '$scope', 'database', 'tabs', collectController ]).
     controller('shareController',[ '$scope', shareController]).
-    factory('indexDB', [ indexDB ]);
+    factory('database', [ indexDbService ]).
+    factory('tabs', [ '$q', tabService ]);
 
   function discoverController($scope){
     $scope.url = 'Discover: http://google.com';
   }
 
-  function collectController($scope, database){
-    function currentUrl() {
-      var queryParams = {
-        'active': true,
-        'lastFocusedWindow': true
-      };
-      chrome.tabs.query(queryParams, function(tabs){
-        return tabs[0].url;
-      });
-    }
+  function collectController($scope, database, tabs){
+    function pFail(reason) { alert('Failed: ' + reason); }
+    function pNotify(update) { alert('Notify: ' + update); }
 
-    $scope.data = database.print();
-    $scope.url = 'Collect: ' + currentUrl();
+    tabs.current().
+      then(function(currentTab) {
+        if(currentTab) {
+          $scope.currentTab = currentTab;
+        }
+      }, pFail, pNotify);
+
+    tabs.active().
+      then(function(activeTabs) {
+        if(activeTabs) {
+          $scope.activeTabs = activeTabs;
+        }
+      }, pFail, pNotify);
   }
 
   function shareController($scope){
     $scope.url = 'Share: http://google.com';
   }
 
-  function indexDB() {
+  function indexDbService() {
     var db = null;
     var version = 1;
 
@@ -56,6 +61,52 @@
 	};
 	request.onerror = $scope.indexedDB.onerror;
       },
+    }
+  }
+
+  function tabService($q) {
+    return {
+      current: function() {
+        var queryParams = {
+          'active': true,
+          'lastFocusedWindow': true
+        };
+        var deferred = $q.defer();
+
+        chrome.tabs.query(queryParams, function(tabs){
+          var tab = tabs[0];
+          if(tab) {
+            console.log(tab.url);
+            deferred.resolve(tab);
+          } else {
+            deferred.reject('Tab ' + tab + ' is not valid.');
+          }
+        });
+
+        return deferred.promise;
+      },
+
+      active: function() {
+        var queryParams = {
+          'lastFocusedWindow': true
+        };
+        var deferred = $q.defer();
+
+        chrome.tabs.query(queryParams, function(tabs){
+          if(tabs) {
+            angular.forEach(tabs, function(tab) {
+              console.log(tab.url);
+            });
+
+            deferred.resolve(tabs);
+          } else {
+            deferred.reject('Tabs ' + tabs + ' is not valid.');
+          }
+        });
+
+        return deferred.promise;
+      }
+      
     }
   }
 })();
