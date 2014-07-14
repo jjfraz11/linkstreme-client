@@ -1,16 +1,16 @@
 (function(){
   angular.module('popupApp', []).
     controller('discoverController', [ '$scope', discoverController ]).
-    controller('collectController', [ '$scope', 'database', 'tabs', collectController ]).
+    controller('collectController', [ '$scope', 'storage', 'tabs', collectController ]).
     controller('shareController',[ '$scope', shareController]).
-    factory('database', [ indexDbService ]).
-    factory('tabs', [ '$q', tabService ]);
+    factory('storage', [ '$q', chromeStorage ]).
+    factory('tabs', [ '$q', chromeTabs ]);
 
   function discoverController($scope){
     $scope.url = 'Discover: http://google.com';
   }
 
-  function collectController($scope, database, tabs){
+  function collectController($scope, storage, tabs){
     function pFail(reason) { alert('Failed: ' + reason); }
     function pNotify(update) { alert('Notify: ' + update); }
 
@@ -18,6 +18,14 @@
       then(function(currentTab) {
         if(currentTab) {
           $scope.currentTab = currentTab;
+
+          var link = {};
+          link[currentTab.url] = currentTab;
+          console.log('Link: ' + link);
+          storage.set(link).
+            then(function(success) {
+              if (success) { console.log('saved link for ' + currentTab.url) };
+            }, pFail);
         }
       }, pFail, pNotify);
 
@@ -33,38 +41,55 @@
     $scope.url = 'Share: http://google.com';
   }
 
-  function indexDbService() {
-    var db = null;
-    var version = 1;
+  function chromeStorage($q) {
+    var storage;
+    // if (type == 'local') {
+    if (true) {
+      storage = chrome.storage.local;
+    } else {
+      alert('Unknown chrome storage type: ' + type);
+      return {}
+    }
 
     return {
-      print: function() { console.log("i did it."); },
-      open: function(){
-	var request = indexedDB.open("linkstreme", version);
-	
-	// We can only create Object stores in a versionchange transaction.
-	request.onupgradeneeded = function(e) {
-	  var db = e.target.result;
-	  
-	  // A versionchange transaction is started automatically
-	  e.target.transaction.onerror = $scope.indexedDB.onerror;
-	  
-	  if (db.objectStoreNames.contains("bookmarks")) {
-	    db.deleteObjectStore("bookmarks");
-	  }
-	  
-	  var store = db.createObjectStore("bookmarks", {keyPath: "timeStamp"});
-	};
+      get: function(key) {
+        var deferred = $q.defer();
 
-	request.onsuccess = function(e) {
-	  $scope.indexedDB.db = e.target.result;
-	};
-	request.onerror = $scope.indexedDB.onerror;
+        storage.get(key, function(found){
+          if(chrome.runtime.lastError) {
+            var message = runtime.lastError.message;
+            console.log('chromeStorageError: ' + message);
+            deferred.reject(message);
+          } else {
+            console.log('Retrieved data for ' + key);
+            deferred.resolve(found)
+          }
+        });
+
+        return deferred.promise;
       },
+
+      set: function(data) {
+        var deferred = $q.defer();
+
+        storage.set(data, function(){
+          if(chrome.runtime.lastError) {
+            message = runtime.lastError.message;
+            console.log('chromeStorageError: ' + message);
+            deferred.reject(message);
+          } else {
+            console.log('Keys: ' + data.keys());
+            alert('Saved link for ' + data.keys(0));
+            deferred.resolve(true);
+          }
+        });
+
+        return deferred.promise;
+      }
     }
   }
 
-  function tabService($q) {
+  function chromeTabs($q) {
     return {
       current: function() {
         var queryParams = {
@@ -106,7 +131,6 @@
 
         return deferred.promise;
       }
-      
     }
   }
 })();

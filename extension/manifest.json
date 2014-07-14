@@ -14,7 +14,7 @@
     "permissions": [
 	"storage", // Needed to use Chrome Storage API
 	"tabs",    // Needed to access info on current tabs
-	"unlimitedStorage", // Needed to allow unlimited persistence for IndexedDB
+	"unlimitedStorage", // Needed to allow unlimited persistence for storage
 
 	"http://*/",
 	"https://*/"
