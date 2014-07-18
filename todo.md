@@ -1,20 +1,20 @@
 * Discover
   Tools for finding links of interest
   * Search - enter keyword and find related links / stremes
-    * Objects: keyword, link, streme, connection
+    * Objects: keyword, link, streme
     * Services: search engine
   * Find related - find links / stremes related to an input link / streme
-    * Objects: link, streme, connection
+    * Objects: link, streme
     * Services: find engine?
   * Explore - browse streme graph, and show links related to selected link
-    * Objects: link, streme, streme graph, connection
+    * Objects: link, streme, streme graph
     * Services: graph explorer
     * Highlights connections to other links in the streme graph
 
 	
 * Collect
   Tools for selecting and grouping links of interest
-  * Bookmark - add a single link to streme
+  * Bookmark - add one or more links to streme
     * Objects: bookmark link, streme
     * Services: bookmarker
   * Load History - add sites in browsing history to visited streme
@@ -47,3 +47,32 @@
   * Share - send a selected link / streme to a specified user
     * Objects: user, link, streme, notification, stremelist
 
+
+* Data Schema
+  * Keyword
+   
+  * User
+   
+  * Session
+
+  * URI - polymorphic type for a web resource by resource type
+    * ID
+    * Domain
+    * Subdomain
+    * Path
+    * Query
+    * Type
+    * Keywords - foreign key list
+
+  * Link - polymorphic type for URI by source (bookmark, history, recorder)
+    * URI - Web resource being referenced, foreign key
+    * Created at
+    * Source Type
+    * Tags - foreign key list
+    * Notes
+
+  * Streme
+    * Links - foreign key list
+
+  * Tag - subtype of keyword
+    * value
