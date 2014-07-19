@@ -1,5 +1,5 @@
 (function(){
-  angular.module('popupApp', []).
+  angular.module('popupApp', ['ui.bootstrap']).
     controller('discoverController', [ '$scope', discoverController ]).
     controller('collectController', [ '$scope', 'storage', 'tabs', collectController ]).
     controller('shareController',[ '$scope', shareController]).
@@ -22,10 +22,10 @@
           var link = {};
           link[currentTab.url] = currentTab;
           console.log('Link: ' + link);
-          storage.set(link).
-            then(function(success) {
-              if (success) { console.log('saved link for ' + currentTab.url) };
-            }, pFail);
+          // storage.set(link).
+          //   then(function(success) {
+          //     if (success) { console.log('saved link for ' + currentTab.url) };
+          //   }, pFail);
         }
       }, pFail, pNotify);
 

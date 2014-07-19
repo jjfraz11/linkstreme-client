@@ -86,6 +86,7 @@
     * Created At
     * Updated At
     * Links - foreign key list
+    * Tags - foreign key list
 
   * Tag
     * value
