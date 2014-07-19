@@ -14,6 +14,17 @@
     function pFail(reason) { alert('Failed: ' + reason); }
     function pNotify(update) { alert('Notify: ' + update); }
 
+    function formatTab(tab) {
+      return {
+        tab_id: tab.id,
+        index: tab.index + 1,
+        title: tab.title,
+        url: tab.url,
+        active: tab.highlighted,
+        selected: false
+      }
+    }
+
     tabs.current().
       then(function(currentTab) {
         if(currentTab) {
@@ -32,9 +43,22 @@
     tabs.active().
       then(function(activeTabs) {
         if(activeTabs) {
-          $scope.activeTabs = activeTabs;
+          $scope.activeTabs = [];
+          angular.forEach(activeTabs, function(tab) {
+            $scope.activeTabs.push(formatTab(tab));
+          });
         }
       }, pFail, pNotify);
+
+    $scope.toggleTab = function(tab, $event) {
+      tab.selected = !tab.selected;
+      $event.stopPropagation();
+    }
+
+    $scope.closeTab = function(tab, $event) {
+      chrome.tabs.remove(tab.tab_id);
+      $event.stopPropagation();
+    }
   }
 
   function shareController($scope){
@@ -119,10 +143,6 @@
 
         chrome.tabs.query(queryParams, function(tabs){
           if(tabs) {
-            angular.forEach(tabs, function(tab) {
-              console.log(tab.url);
-            });
-
             deferred.resolve(tabs);
           } else {
             deferred.reject('Tabs ' + tabs + ' is not valid.');
