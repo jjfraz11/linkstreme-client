@@ -55,24 +55,37 @@
    
   * Session
 
-  * URI - polymorphic type for a web resource by resource type
+  * URI - descriptive data for a web resource
     * ID
+    * Title
     * Domain
     * Subdomain
     * Path
     * Query
-    * Type
+    * Resource Type
     * Keywords - foreign key list
+    * Last visited
 
-  * Link - polymorphic type for URI by source (bookmark, history, recorder)
+  * Link - join data for a URI in a Streme
+    * Name
     * URI - Web resource being referenced, foreign key
+    * Streme - Streme being referenced, foreign key
     * Created at
-    * Source Type
+    * Updated at
+    * Order
     * Tags - foreign key list
-    * Notes
+    * Type (bookmark, history, recorder)
+    * Comment
 
-  * Streme
+  * Streme - collection of links
+    * Name
+    * Source Type
+    * Visibility
+    * User - foreign key
+    * Created At Session - foreign key
+    * Created At
+    * Updated At
     * Links - foreign key list
 
-  * Tag - subtype of keyword
+  * Tag
     * value
