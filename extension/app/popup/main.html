@@ -1,36 +1,47 @@
 <html>
   <head>
     <title>Linkstreme Client</title>
-    <link rel="stylesheet" href="/vendor/css/bootstrap-combined.min.css" />
+    <link rel="stylesheet" href="/vendor/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="main.css" />
   </head>
 
   <body>
     <div ng-app="popupApp">
-      <div class="btn-group">
-        <button type="button" class="btn btn-default">Discover</button>
-        <button type="button" class="btn btn-default">Collect</button>
-        <button type="button" class="btn btn-default">Share</button>
-      </div>
-      <div ng-controller="collectController">
-        Current: {{ currentTab.url }}
-        <div ng-repeat="tab in activeTabs">
-          <!-- Left: checkbox
-               Middle Top: <bold 12pt> Index - Tile 
-               Middle Bottom: <plain 10pt> Url first two lines wrapped
-               Right: closebox
-            -->
-          {{ tab.index }} - {{ tab.title }}
-          {{ tab.url }}
-        </div>
-      </div>
-      <div ng-controller="shareController">
-        {{ url }}
-      </div>
+      <tabset>
+        <tab heading="Discover">Empty</tab>
+        <tab heading="Collect">
+          <div ng-controller="collectController">
+            Current: {{ currentTab.url }}
+            <!-- Left: checkbox
+                 Middle Top: <bold 12pt> Index - Tile 
+                 Middle Bottom: <plain 10pt> Url first two lines wrapped
+                 Right: closebox
+              -->
+            <accordion>
+              <accordion-group ng-repeat="tab in activeTabs">
+                <accordion-heading>
+                  <span>
+                    <div>Checkbox</div>
+                    <div>
+                      #{{ tab.index + 1 }} - {{ tab.title }}
+                    </div>
+                    <div>Close</div>
+                  </span>
+                </accordion-heading>
+                {{ tab.url }}
+              </accordion-group>
+            </accordion>
+          </div>
+        </tab>
+        <tab heading="Share">
+          <div ng-controller="shareController">
+            {{ url }}
+          </div>
+        </tab>
+      </tabset>
     </div>
 
-    <script type="text/javascript" src="/vendor/js/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="/vendor/js/angular.min.js"></script>
-    <script type="text/javascript" src="/vendor/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/vendor/js/ui-bootstrap-tpls-0.11.0.min.js"></script>
     <script type="text/javascript" src="main.js"></script>
   </body>
