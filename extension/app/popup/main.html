@@ -22,6 +22,7 @@
                       ng-click="linkstreme.select(streme)">{{streme.name}}</li>
                 </ul>
 
+                <!-- TODO: Animate collapse more gracefully on save. -->
                 <div collapse="!linkstreme.showNew">
                   <form novalidate class="simple-form">
                     Name: <input type="text" ng-model="newStreme.name" />
@@ -69,10 +70,13 @@
         <!-- Collecct Tab -->
         <tab heading="Collect">
           <div ng-controller="CollectCtrl">
-            Current: {{ currentTab.url }}
 
+            <!-- TODO: This should be split button dropdown with more opts -->
             <button type="button" class="btn btn-primary"
+                    ng-click="addLinks()">Add to Streme</button>
+            <button type="button" class="btn btn-default"
                     ng-click="undoCloseTab()">Undo Tab Close</button>
+
             <accordion>
               <div ng-repeat="tab in activeTabs">
                 <accordion-group is-open="tab.active">
@@ -103,6 +107,7 @@
 
     <script type="text/javascript" src="/vendor/js/angular.min.js"></script>
     <script type="text/javascript" src="/vendor/js/ui-bootstrap-tpls-0.11.0.min.js"></script>
+    <script type="text/javascript" src="/vendor/js/idbstore.js"></script>
     <script type="text/javascript" src="main.js"></script>
   </body>
 </html>

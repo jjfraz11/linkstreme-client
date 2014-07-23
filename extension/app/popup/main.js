@@ -1,17 +1,17 @@
 (function(){
   angular.module('popupApp', ['ui.bootstrap']).
-    controller('StremeSelectCtrl', [ '$scope', '$modal', StremeSelectCtrl ]).
+    controller('StremeSelectCtrl', [ '$scope', '$modal', 'db', StremeSelectCtrl ]).
     controller('DiscoverCtrl', [ '$scope', DiscoverCtrl ]).
     controller('CollectCtrl',
                [ '$scope', 'db', 'sessions', 'storage', 'tabs', CollectCtrl ]).
     controller('ShareCtrl',[ '$scope', ShareCtrl]).
-    factory('db', [ indexedDB ]).
+    factory('db', [ '$q', indexedDB ]).
     factory('sessions', [ chromeSessions ]).
     factory('storage', [ '$q', chromeStorage ]).
     factory('tabs', [ '$q', chromeTabs ]);
 
   function StremeSelectCtrl($scope, $modal) {
-    $scope.selectedStreme = { name: 'Please Select a Streme...' };
+    $scope.selectedStreme = { name: 'Select Streme...' };
 
     $scope.open = function(stremeType) {
       var modalInstance = $modal.open({
@@ -29,7 +29,7 @@
     }
   }
 
-  function StremeSelectModalCtrl($scope, $modalInstance, stremeType) {
+  function StremeSelectModalCtrl($scope, $modalInstance, db, stremeType) {
     $scope.stremeType = stremeType;
 
     $scope.selectedStreme = { name: 'Select...' };
@@ -46,23 +46,36 @@
       active: ( stremeType == 'linkstreme' ),
       heading: "Linkstreme",
       showNew: false,
-      stremes: [ { name: 'streme01' },
-                 { name: 'streme02' },
-                 { name: 'streme03' } ],
+      stremes: [],
 
       add: function(streme) {
-        this.showNew = false;
-        this.stremes.push(streme);
-        this.select(streme);
+        db.addStreme(streme).
+          then(function(message) {
+            $scope.linkstreme.showNew = false;
+            $scope.linkstreme.updateStremes();
+            $scope.linkstreme.select(streme);
+            console.log(message);
+          }, function(message) {
+            alert(message);
+          });
       },
 
       create: function() {
-        this.showNew = true;
+        $scope.linkstreme.showNew = true;
         initNewStreme();
       },
 
       select: function(streme) {
         selectStreme(streme);
+      },
+
+      updateStremes: function() {
+        db.allStremes().
+          then(function(stremes) {
+            $scope.linkstreme.stremes = stremes;
+          }, function(error) {
+            alert(error);
+          });
       }
     };
 
@@ -83,6 +96,8 @@
     $scope.cancel = function() {
       $modalInstance.dismiss('canceled result');
     };
+
+    $scope.linkstreme.updateStremes();
   }
 
   function DiscoverCtrl($scope){
@@ -130,10 +145,12 @@
     }
 
     // Scope methods
-    $scope.toggleTab = function(tab, $event) {
-      // Disable click event for checkbox element
-      $event.stopPropagation();
-      tab.selected = !tab.selected;
+    $scope.addLinks = function() {
+      angular.forEach($scope.activeTabs, function(tab) {
+        if(tab.selected) {
+          console.log('Selected: ' + tab.title);
+        }
+      });
     }
 
     $scope.closeTab = function(tab, $event) {
@@ -141,6 +158,12 @@
       $event.stopPropagation();
       tabs.remove(tab.tab_id);
       setActiveTabs();
+    }
+
+    $scope.toggleTab = function(tab, $event) {
+      // Disable click event for checkbox element
+      $event.stopPropagation();
+      tab.selected = !tab.selected;
     }
 
     // Todo: prevent user from opening tabs closed before popup opened
@@ -268,8 +291,70 @@
     }
   }
 
-  function indexedDB() {
+  function indexedDB($q) {
+    var stremes = new IDBStore({
+      dbVersion: 3,
+      storeName: 'stremes',
+      keyPath: 'id',
+      autoIncrement: true,
+      onStoreReady: onStoreReady,
+
+      indexes: [ {
+        name: 'streme_name',
+        keyPath: 'name',
+        unique: true,
+        multientry: false
+      } ]
+    });
+
+    var links = new IDBStore({
+      dbVersion: 1,
+      storeName: 'links',
+      keyPath: 'id',
+      autoIncrement: true,
+      onStoreReady: onStoreReady,
+
+      indexes: [ {
+        name: 'streme_id',
+        keyPath: 'streme_id',
+        unique: false,
+        multientry: false
+      }, {
+        name: 'uri_id',
+        keyPath: 'uri_id',
+        unique: false,
+        multientry: false
+      } ]
+    });
+
+    function onStoreReady() {
+      console.log('Store ready: ' + this.storeName);
+    }
+
     return {
+      addStreme: function(streme) {
+        var deferred = $q.defer();
+
+        stremes.put(streme, function() {
+          deferred.resolve('Added streme: ' + streme.name);
+        }, function() {
+          deferred.reject('Could not add streme: ' + streme.name);
+        });
+
+        return deferred.promise;
+      },
+
+      allStremes: function() {
+        var deferred = $q.defer();
+
+        stremes.getAll(function(stremes) {
+          deferred.resolve(stremes);
+        }, function() {
+          deferred.reject('Could not get all stremes.');
+        });
+
+        return deferred.promise; 
+      }
     }
   }
 })();
