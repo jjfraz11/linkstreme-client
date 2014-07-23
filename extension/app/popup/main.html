@@ -7,12 +7,57 @@
 
   <body>
     <div ng-app="popupApp">
+
+      <!-- Streme Selector -->
+      <div ng-controller="StremeSelectCtrl">
+        <!-- Streme Select Modal -->
+        <script type="text/ng-template" id="streme_select_modal.html">
+          <div class="modal-body">
+            <tabset>
+              <tab heading="{{linkstreme.heading}}" active="linkstreme.active">
+                <ul>
+                  <li ng-repeat="streme in linkstreme.stremes"
+                      ng-click="selectStreme(streme)">{{streme.name}}</li>
+                </ul>
+                Select: <input ng-model="selectedStreme.name"></input>
+              </tab>
+              <tab heading="{{bookmarks.heading}}" active="bookmarks.active">
+              </tab>
+              <tab heading="{{history.heading}}" active="history.active">
+              </tab>
+            </tabset>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="ok()">OK</button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+          </div>
+        </script>
+
+        <!-- TODO: This input should fit default text properly -->
+        <input type="text" ng-model="selectedStreme.name" />
+        <div class="btn-group" dropdown>
+          <button type="button" class="btn btn-primary dropdown-toggle"
+                  ng-disabled="disabled">Select</button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a ng-click="open('linkstreme')">Linkstreme ...</a></li>
+            <li><a ng-click="open('bookmarks')">Bookmarks ...</a></li>
+            <li><a ng-click="open('history')">History ...</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Context Tabs -->
       <tabset>
+        <!-- Discover Tab -->
         <tab heading="Discover">Empty</tab>
+
+        <!-- Collecct Tab -->
         <tab heading="Collect">
-          <div ng-controller="collectController">
+          <div ng-controller="CollectCtrl">
             Current: {{ currentTab.url }}
 
+            <button type="button" class="btn btn-primary"
+                    ng-click="undoCloseTab()">Undo Tab Close</button>
             <accordion>
               <div ng-repeat="tab in activeTabs">
                 <accordion-group is-open="tab.active">
@@ -27,12 +72,14 @@
                   </accordion-heading>
                 </accordion-group>
               </div>
-            </accordion>
-
+            </accordion
+>
           </div>
         </tab>
+
+        <!-- Share Tab -->
         <tab heading="Share">
-          <div ng-controller="shareController">
+          <div ng-controller="ShareCtrl">
             {{ url }}
           </div>
         </tab>

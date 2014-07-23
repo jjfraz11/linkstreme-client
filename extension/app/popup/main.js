@@ -1,19 +1,97 @@
 (function(){
   angular.module('popupApp', ['ui.bootstrap']).
-    controller('discoverController', [ '$scope', discoverController ]).
-    controller('collectController', [ '$scope', 'storage', 'tabs', collectController ]).
-    controller('shareController',[ '$scope', shareController]).
+    controller('StremeSelectCtrl', [ '$scope', '$modal', StremeSelectCtrl ]).
+    controller('DiscoverCtrl', [ '$scope', DiscoverCtrl ]).
+    controller('CollectCtrl', [ '$scope', 'storage', 'tabs', CollectCtrl ]).
+    controller('ShareCtrl',[ '$scope', ShareCtrl]).
     factory('storage', [ '$q', chromeStorage ]).
     factory('tabs', [ '$q', chromeTabs ]);
 
-  function discoverController($scope){
+  function StremeSelectCtrl($scope, $modal) {
+    $scope.selectedStreme = { name: 'Please Select a Streme...' };
+
+    $scope.open = function(stremeType) {
+      var modalInstance = $modal.open({
+        templateUrl: 'streme_select_modal.html',
+        controller: StremeSelectModalCtrl,
+        resolve: {
+          stremeType: function () { return stremeType; }
+        }
+      });
+
+      modalInstance.result.
+        then(function(streme) {
+          $scope.selectedStreme = streme;
+        }, function() { alert('Failure'); });
+    }
+  }
+
+  function StremeSelectModalCtrl($scope, $modalInstance, stremeType) {
+    // Todo: this should be uppercased
+    $scope.stremeType = stremeType;
+
+    $scope.linkstreme = {
+      heading: "Linkstreme",
+      active: ( stremeType == 'linkstreme' ),
+      stremes: [ { name: 'streme01' },
+                 { name: 'streme02' },
+                 { name: 'streme03' } ]
+    };
+
+    $scope.bookmarks = {
+      heading: "Bookmarks", active: ( stremeType == 'bookmarks' )
+    };
+
+    $scope.history = {
+      heading: "History", active: ( stremeType == 'history' )
+    };
+
+    $scope.ok = function() {
+      $modalInstance.close($scope.selectedStreme);
+    };
+
+    $scope.cancel = function() {
+      $modalInstance.dismiss('canceld result');
+    };
+
+    $scope.selectStreme = function(streme) {
+      $scope.selectedStreme = streme;
+    };
+  }
+
+  function DiscoverCtrl($scope){
     $scope.url = 'Discover: http://google.com';
   }
 
-  function collectController($scope, storage, tabs){
+  function CollectCtrl($scope, storage, tabs){
+    // Private methods
     function pFail(reason) { alert('Failed: ' + reason); }
     function pNotify(update) { alert('Notify: ' + update); }
 
+    // Set current tab
+    function setCurrentTab() {
+      tabs.current().
+        then(function(currentTab) {
+          if(currentTab) {
+            $scope.currentTab = currentTab;
+          }
+        }, pFail, pNotify);
+    }
+
+    // Set active tabs
+    function setActiveTabs() {
+      tabs.active().
+        then(function(activeTabs) {
+          if(activeTabs) {
+            $scope.activeTabs = [];
+            angular.forEach(activeTabs, function(tab) {
+              $scope.activeTabs.push(formatTab(tab));
+            });
+          }
+        }, pFail, pNotify);
+    }
+
+    // Return standard tab object
     function formatTab(tab) {
       return {
         tab_id: tab.id,
@@ -25,43 +103,36 @@
       }
     }
 
-    tabs.current().
-      then(function(currentTab) {
-        if(currentTab) {
-          $scope.currentTab = currentTab;
-
-          var link = {};
-          link[currentTab.url] = currentTab;
-          console.log('Link: ' + link);
-          // storage.set(link).
-          //   then(function(success) {
-          //     if (success) { console.log('saved link for ' + currentTab.url) };
-          //   }, pFail);
-        }
-      }, pFail, pNotify);
-
-    tabs.active().
-      then(function(activeTabs) {
-        if(activeTabs) {
-          $scope.activeTabs = [];
-          angular.forEach(activeTabs, function(tab) {
-            $scope.activeTabs.push(formatTab(tab));
-          });
-        }
-      }, pFail, pNotify);
-
+    // Scope methods
     $scope.toggleTab = function(tab, $event) {
-      tab.selected = !tab.selected;
+      // Disable click event for checkbox element
       $event.stopPropagation();
+      tab.selected = !tab.selected;
     }
 
     $scope.closeTab = function(tab, $event) {
-      chrome.tabs.remove(tab.tab_id);
+      // Disable click event for close tab element
       $event.stopPropagation();
+      chrome.tabs.remove(tab.tab_id);
+      setActiveTabs();
     }
+
+    // Todo: prevent user from opening tabs closed before popup opened
+    // Todo: prevent reopened tab from gaining focus and closing popup
+    $scope.undoCloseTab = function() {
+      chrome.sessions.restore(function(restoredSession) {
+        if(restoredSession.tab) {
+          chrome.tabs.update(restoredSession.tab.id, {selected: false});
+        }
+      });
+      setActiveTabs();
+    }
+
+    setCurrentTab();
+    setActiveTabs();
   }
 
-  function shareController($scope){
+  function ShareCtrl($scope){
     $scope.url = 'Share: http://google.com';
   }
 
@@ -69,7 +140,7 @@
     var storage;
     // if (type == 'local') {
     if (true) {
-      storage = chrome.storage.local;
+      // storage = chrome.storage.local;
     } else {
       alert('Unknown chrome storage type: ' + type);
       return {}

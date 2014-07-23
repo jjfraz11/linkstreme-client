@@ -11,8 +11,9 @@
   },
 
   "permissions": [
-    "storage", // Needed to use Chrome Storage API
-    "tabs",    // Needed to access info on current tabs
+    "sessions", // Needed to access info on closed tabs
+    "storage",  // Enable Chrome Storage
+    "tabs",     // Needed to access info on current tabs
     "unlimitedStorage", // Needed to allow unlimited persistence for storage
 
     "http://*/",
