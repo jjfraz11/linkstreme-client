@@ -11,18 +11,33 @@
       <!-- Streme Selector -->
       <div ng-controller="StremeSelectCtrl">
         <!-- Streme Select Modal -->
+        <!-- TODO: Move modal template to seperate file -->
         <script type="text/ng-template" id="streme_select_modal.html">
           <div class="modal-body">
             <tabset>
               <tab heading="{{linkstreme.heading}}" active="linkstreme.active">
+                Selected: <input ng-model="selectedStreme.name"></input>
                 <ul>
                   <li ng-repeat="streme in linkstreme.stremes"
-                      ng-click="selectStreme(streme)">{{streme.name}}</li>
+                      ng-click="linkstreme.select(streme)">{{streme.name}}</li>
                 </ul>
-                Select: <input ng-model="selectedStreme.name"></input>
+
+                <div collapse="!linkstreme.showNew">
+                  <form novalidate class="simple-form">
+                    Name: <input type="text" ng-model="newStreme.name" />
+                    <button ng-click="linkstreme.add(newStreme)">Save</button>
+                    <button ng-click="linkstreme.showNew = false">Cancel</button>
+                  </form>
+                </div>
+
+                <a ng-click="linkstreme.create()">
+                  <i class="glyphicon glyphicon-plus"></i>New Streme
+                </a>
               </tab>
+
               <tab heading="{{bookmarks.heading}}" active="bookmarks.active">
               </tab>
+
               <tab heading="{{history.heading}}" active="history.active">
               </tab>
             </tabset>

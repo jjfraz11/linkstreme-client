@@ -2,8 +2,11 @@
   angular.module('popupApp', ['ui.bootstrap']).
     controller('StremeSelectCtrl', [ '$scope', '$modal', StremeSelectCtrl ]).
     controller('DiscoverCtrl', [ '$scope', DiscoverCtrl ]).
-    controller('CollectCtrl', [ '$scope', 'storage', 'tabs', CollectCtrl ]).
+    controller('CollectCtrl',
+               [ '$scope', 'db', 'sessions', 'storage', 'tabs', CollectCtrl ]).
     controller('ShareCtrl',[ '$scope', ShareCtrl]).
+    factory('db', [ indexedDB ]).
+    factory('sessions', [ chromeSessions ]).
     factory('storage', [ '$q', chromeStorage ]).
     factory('tabs', [ '$q', chromeTabs ]);
 
@@ -22,28 +25,55 @@
       modalInstance.result.
         then(function(streme) {
           $scope.selectedStreme = streme;
-        }, function() { alert('Failure'); });
+        }, function() { console.log('No streme selected.'); });
     }
   }
 
   function StremeSelectModalCtrl($scope, $modalInstance, stremeType) {
-    // Todo: this should be uppercased
     $scope.stremeType = stremeType;
 
+    $scope.selectedStreme = { name: 'Select...' };
+
+    function initNewStreme() {
+      $scope.newStreme = {};
+    }
+
+    function selectStreme(streme) {
+      $scope.selectedStreme = streme;
+    };
+
     $scope.linkstreme = {
-      heading: "Linkstreme",
       active: ( stremeType == 'linkstreme' ),
+      heading: "Linkstreme",
+      showNew: false,
       stremes: [ { name: 'streme01' },
                  { name: 'streme02' },
-                 { name: 'streme03' } ]
+                 { name: 'streme03' } ],
+
+      add: function(streme) {
+        this.showNew = false;
+        this.stremes.push(streme);
+        this.select(streme);
+      },
+
+      create: function() {
+        this.showNew = true;
+        initNewStreme();
+      },
+
+      select: function(streme) {
+        selectStreme(streme);
+      }
     };
 
     $scope.bookmarks = {
-      heading: "Bookmarks", active: ( stremeType == 'bookmarks' )
+      active: ( stremeType == 'bookmarks' ),
+      heading: "Bookmarks"
     };
 
     $scope.history = {
-      heading: "History", active: ( stremeType == 'history' )
+      active: ( stremeType == 'history' ),
+      heading: "History"
     };
 
     $scope.ok = function() {
@@ -51,11 +81,7 @@
     };
 
     $scope.cancel = function() {
-      $modalInstance.dismiss('canceld result');
-    };
-
-    $scope.selectStreme = function(streme) {
-      $scope.selectedStreme = streme;
+      $modalInstance.dismiss('canceled result');
     };
   }
 
@@ -63,7 +89,7 @@
     $scope.url = 'Discover: http://google.com';
   }
 
-  function CollectCtrl($scope, storage, tabs){
+  function CollectCtrl($scope, db, sessions, storage, tabs){
     // Private methods
     function pFail(reason) { alert('Failed: ' + reason); }
     function pNotify(update) { alert('Notify: ' + update); }
@@ -113,21 +139,18 @@
     $scope.closeTab = function(tab, $event) {
       // Disable click event for close tab element
       $event.stopPropagation();
-      chrome.tabs.remove(tab.tab_id);
+      tabs.remove(tab.tab_id);
       setActiveTabs();
     }
 
     // Todo: prevent user from opening tabs closed before popup opened
     // Todo: prevent reopened tab from gaining focus and closing popup
     $scope.undoCloseTab = function() {
-      chrome.sessions.restore(function(restoredSession) {
-        if(restoredSession.tab) {
-          chrome.tabs.update(restoredSession.tab.id, {selected: false});
-        }
-      });
+      sessions.restoreLastTab();
       setActiveTabs();
     }
 
+    // TODO move these methods into an init function
     setCurrentTab();
     setActiveTabs();
   }
@@ -184,8 +207,37 @@
     }
   }
 
+  function chromeSessions() {
+    return {
+      restore: function(restoreCallback) {
+        chrome.sessions.restore(restoreCallback);
+      },
+
+      restoreLastTab: function() {
+        chrome.sessions.restore();
+      }
+    }
+  }
+
   function chromeTabs($q) {
     return {
+      active: function() {
+        var queryParams = {
+          'lastFocusedWindow': true
+        };
+        var deferred = $q.defer();
+
+        chrome.tabs.query(queryParams, function(tabs){
+          if(tabs) {
+            deferred.resolve(tabs);
+          } else {
+            deferred.reject('Tabs ' + tabs + ' is not valid.');
+          }
+        });
+
+        return deferred.promise;
+      },
+
       current: function() {
         var queryParams = {
           'active': true,
@@ -206,22 +258,18 @@
         return deferred.promise;
       },
 
-      active: function() {
-        var queryParams = {
-          'lastFocusedWindow': true
-        };
-        var deferred = $q.defer();
+      remove: function(tab_id) {
+        chrome.tabs.remove(tab_id);
+      },
 
-        chrome.tabs.query(queryParams, function(tabs){
-          if(tabs) {
-            deferred.resolve(tabs);
-          } else {
-            deferred.reject('Tabs ' + tabs + ' is not valid.');
-          }
-        });
-
-        return deferred.promise;
+      update: function(tab_id, options) {
+        chrome.tabs.update(tab_id, options);
       }
+    }
+  }
+
+  function indexedDB() {
+    return {
     }
   }
 })();
