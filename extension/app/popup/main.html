@@ -16,7 +16,7 @@
           <div class="modal-body">
             <tabset>
               <tab heading="{{linkstreme.heading}}" active="linkstreme.active">
-                Selected: <input ng-model="selectedStreme.name"></input>
+                Selected: <input ng-model="currentStreme.name"></input>
                 <ul>
                   <li ng-repeat="streme in linkstreme.stremes"
                       ng-click="linkstreme.select(streme)">{{streme.name}}</li>
@@ -50,7 +50,7 @@
         </script>
 
         <!-- TODO: This input should fit default text properly -->
-        <input type="text" ng-model="selectedStreme.name" />
+        <input type="text" ng-model="currentStreme.name" />
         <div class="btn-group" dropdown>
           <button type="button" class="btn btn-primary dropdown-toggle"
                   ng-disabled="disabled">Select</button>
@@ -73,7 +73,7 @@
 
             <!-- TODO: This should be split button dropdown with more opts -->
             <button type="button" class="btn btn-primary"
-                    ng-click="addLinks()">Add to Streme</button>
+                    ng-click="saveLinks()">Save Links</button>
             <button type="button" class="btn btn-default"
                     ng-click="undoCloseTab()">Undo Tab Close</button>
 
@@ -105,9 +105,15 @@
       </tabset>
     </div>
 
+    <!-- Framework level dependencies -->
     <script type="text/javascript" src="/vendor/js/angular.min.js"></script>
     <script type="text/javascript" src="/vendor/js/ui-bootstrap-tpls-0.11.0.min.js"></script>
+
+    <!-- Module level dependencies -->
     <script type="text/javascript" src="/vendor/js/idbstore.js"></script>
+    <script type="text/javascript" src="/vendor/js/uri.min.js"></script>
+
+    <!-- Application Script -->
     <script type="text/javascript" src="main.js"></script>
   </body>
 </html>

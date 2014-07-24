@@ -1,46 +1,43 @@
 (function(){
   angular.module('popupApp', ['ui.bootstrap']).
-    controller('StremeSelectCtrl', [ '$scope', '$modal', 'db', StremeSelectCtrl ]).
+    controller('StremeSelectCtrl',
+               [ '$scope', '$rootScope', '$modal', StremeSelectCtrl ]).
     controller('DiscoverCtrl', [ '$scope', DiscoverCtrl ]).
     controller('CollectCtrl',
-               [ '$scope', 'db', 'sessions', 'storage', 'tabs', CollectCtrl ]).
+               [ '$scope', '$rootScope',
+                 'LinkStreme', 'Sessions', 'Tabs', CollectCtrl ]).
     controller('ShareCtrl',[ '$scope', ShareCtrl]).
-    factory('db', [ '$q', indexedDB ]).
-    factory('sessions', [ chromeSessions ]).
-    factory('storage', [ '$q', chromeStorage ]).
-    factory('tabs', [ '$q', chromeTabs ]);
+    factory('DB', [ '$q', IndexedDB ]).
+    factory('LinkStreme', [ '$q', 'DB', 'Uri', LinkStreme ]).
+    factory('Sessions', [ ChromeSessions ]).
+    factory('Storage', [ '$q', ChromeStorage ]).
+    factory('Tabs', [ '$q', ChromeTabs ]).
+    factory('Uri', [ Uri ]);
 
-  function StremeSelectCtrl($scope, $modal) {
-    $scope.selectedStreme = { name: 'Select Streme...' };
+  function StremeSelectCtrl($scope, $rootScope, $modal) {
+    $scope.currentStreme = { name: 'Select Streme...' };
 
     $scope.open = function(stremeType) {
       var modalInstance = $modal.open({
         templateUrl: 'streme_select_modal.html',
         controller: StremeSelectModalCtrl,
         resolve: {
+          currentStreme: function() { return $scope.currentStreme; },
           stremeType: function () { return stremeType; }
         }
       });
 
       modalInstance.result.
         then(function(streme) {
-          $scope.selectedStreme = streme;
+          $scope.currentStreme = streme;
+          $rootScope.$emit('stremeChange', streme);
         }, function() { console.log('No streme selected.'); });
     }
   }
 
-  function StremeSelectModalCtrl($scope, $modalInstance, db, stremeType) {
+  function StremeSelectModalCtrl($scope, $modalInstance, DB, currentStreme, stremeType) {
+    $scope.currentStreme = currentStreme;
     $scope.stremeType = stremeType;
-
-    $scope.selectedStreme = { name: 'Select...' };
-
-    function initNewStreme() {
-      $scope.newStreme = {};
-    }
-
-    function selectStreme(streme) {
-      $scope.selectedStreme = streme;
-    };
 
     $scope.linkstreme = {
       active: ( stremeType == 'linkstreme' ),
@@ -49,12 +46,12 @@
       stremes: [],
 
       add: function(streme) {
-        db.addStreme(streme).
-          then(function(message) {
+        DB.addTo('stremes', streme).
+          then(function(result) {
             $scope.linkstreme.showNew = false;
             $scope.linkstreme.updateStremes();
             $scope.linkstreme.select(streme);
-            console.log(message);
+            console.log(result.message + ' : ' + result.keyPath);
           }, function(message) {
             alert(message);
           });
@@ -62,15 +59,15 @@
 
       create: function() {
         $scope.linkstreme.showNew = true;
-        initNewStreme();
+        $scope.newStreme = {};
       },
 
       select: function(streme) {
-        selectStreme(streme);
+        $scope.currentStreme = streme;
       },
 
       updateStremes: function() {
-        db.allStremes().
+        DB.getAllFrom('stremes').
           then(function(stremes) {
             $scope.linkstreme.stremes = stremes;
           }, function(error) {
@@ -81,7 +78,7 @@
 
     $scope.bookmarks = {
       active: ( stremeType == 'bookmarks' ),
-      heading: "Bookmarks"
+       heading: "Bookmarks"
     };
 
     $scope.history = {
@@ -90,13 +87,14 @@
     };
 
     $scope.ok = function() {
-      $modalInstance.close($scope.selectedStreme);
+      $modalInstance.close($scope.currentStreme);
     };
 
     $scope.cancel = function() {
       $modalInstance.dismiss('canceled result');
     };
 
+    // Init code
     $scope.linkstreme.updateStremes();
   }
 
@@ -104,14 +102,14 @@
     $scope.url = 'Discover: http://google.com';
   }
 
-  function CollectCtrl($scope, db, sessions, storage, tabs){
+  function CollectCtrl($scope, $rootScope, LinkStreme, Sessions, Tabs){
     // Private methods
-    function pFail(reason) { alert('Failed: ' + reason); }
-    function pNotify(update) { alert('Notify: ' + update); }
+    var pFail = function(reason) { alert('Failed: ' + reason); }
+    var pNotify = function(update) { alert('Notify: ' + update); }
 
     // Set current tab
-    function setCurrentTab() {
-      tabs.current().
+    var setCurrentTab = function() {
+      Tabs.current().
         then(function(currentTab) {
           if(currentTab) {
             $scope.currentTab = currentTab;
@@ -120,8 +118,20 @@
     }
 
     // Set active tabs
-    function setActiveTabs() {
-      tabs.active().
+    var setActiveTabs = function() {
+      // Return standard tab object
+      var formatTab = function(tab) {
+        return {
+          tab_id: tab.id,
+          index: tab.index + 1,
+          title: tab.title,
+          url: tab.url,
+          active: tab.highlighted,
+          selected: false
+        };
+      };
+
+      Tabs.active().
         then(function(activeTabs) {
           if(activeTabs) {
             $scope.activeTabs = [];
@@ -132,32 +142,59 @@
         }, pFail, pNotify);
     }
 
-    // Return standard tab object
-    function formatTab(tab) {
-      return {
-        tab_id: tab.id,
-        index: tab.index + 1,
-        title: tab.title,
-        url: tab.url,
-        active: tab.highlighted,
-        selected: false
-      }
-    }
+    // Event Handlers
+    var unbind = $rootScope.$on('stremeChange', function(event, streme) {
+      $scope.currentStreme = streme;
+    });
+    // Unbind callbacks for this controller defined on $rootScope
+    $scope.$on('$destroy', unbind);
 
     // Scope methods
-    $scope.addLinks = function() {
-      angular.forEach($scope.activeTabs, function(tab) {
-        if(tab.selected) {
-          console.log('Selected: ' + tab.title);
-        }
-      });
-    }
-
     $scope.closeTab = function(tab, $event) {
       // Disable click event for close tab element
       $event.stopPropagation();
-      tabs.remove(tab.tab_id);
-      setActiveTabs();
+      Tabs.remove(tab.tab_id).
+        then(function(success) {
+          if (success)
+            setActiveTabs();
+          else
+            alert('Tab ' + tab.title + ' not closed.');
+        });
+    }
+
+    $scope.saveLinks = function() {
+      if (!$scope.currentStreme) {
+        alert('No streme selected.');
+        return;
+      }
+
+      // Helper functions for saveLinks
+      var getUri = function(url) {
+        return LinkStreme.findOrCreateUri(url).
+          then(function(uri) {
+            return uri;
+          }, function(message) {
+            alert(message);
+          });
+      };
+
+      var createLink = function(uri) {
+        return LinkStreme.createLink($scope.currentStreme, uri).
+          then(function(result) {
+            console.log(result.message + ' : ' + result.keyPath);
+          }, function(message) {
+            alert(message);
+          });
+      };
+
+      // TODO: need to add check for at least one selected tab.
+      angular.forEach($scope.activeTabs, function(tab) {
+        if(tab.selected) {
+          console.log('Selected: ' + tab.title);
+
+          getUri(tab.url).then(createLink);
+        }
+      });
     }
 
     $scope.toggleTab = function(tab, $event) {
@@ -169,11 +206,12 @@
     // Todo: prevent user from opening tabs closed before popup opened
     // Todo: prevent reopened tab from gaining focus and closing popup
     $scope.undoCloseTab = function() {
-      sessions.restoreLastTab();
+      Sessions.restoreLastTab();
       setActiveTabs();
     }
 
     // TODO move these methods into an init function
+    // Init code
     setCurrentTab();
     setActiveTabs();
   }
@@ -182,14 +220,14 @@
     $scope.url = 'Share: http://google.com';
   }
 
-  function chromeStorage($q) {
+  function ChromeStorage($q) {
     var storage;
     // if (type == 'local') {
     if (true) {
       // storage = chrome.storage.local;
     } else {
       alert('Unknown chrome storage type: ' + type);
-      return {}
+      return {};
     }
 
     return {
@@ -227,10 +265,10 @@
 
         return deferred.promise;
       }
-    }
+    };
   }
 
-  function chromeSessions() {
+  function ChromeSessions() {
     return {
       restore: function(restoreCallback) {
         chrome.sessions.restore(restoreCallback);
@@ -239,10 +277,10 @@
       restoreLastTab: function() {
         chrome.sessions.restore();
       }
-    }
+    };
   }
 
-  function chromeTabs($q) {
+  function ChromeTabs($q) {
     return {
       active: function() {
         var queryParams = {
@@ -282,33 +320,28 @@
       },
 
       remove: function(tab_id) {
-        chrome.tabs.remove(tab_id);
+        var deferred = $q.defer();
+
+         chrome.tabs.remove(tab_id, function() {
+          deferred.resolve(true);
+        });
+
+        return deferred.promise;
       },
 
       update: function(tab_id, options) {
         chrome.tabs.update(tab_id, options);
       }
-    }
+    };
   }
 
-  function indexedDB($q) {
-    var stremes = new IDBStore({
-      dbVersion: 3,
-      storeName: 'stremes',
-      keyPath: 'id',
-      autoIncrement: true,
-      onStoreReady: onStoreReady,
-
-      indexes: [ {
-        name: 'streme_name',
-        keyPath: 'name',
-        unique: true,
-        multientry: false
-      } ]
-    });
+  function IndexedDB($q) {
+    var onStoreReady = function() {
+      console.log('Store ready: ' + this.storeName);
+    }
 
     var links = new IDBStore({
-      dbVersion: 1,
+      dbVersion: 2,
       storeName: 'links',
       keyPath: 'id',
       autoIncrement: true,
@@ -324,37 +357,217 @@
         keyPath: 'uri_id',
         unique: false,
         multientry: false
+      }, {
+        name: 'streme_uri_key',
+        keyPath: 'streme_uri_key',
+        unique: true,
+        multientry: false
+      }]
+    });
+    links.objectName = function(link) {
+      return 'Link Key: ' + link.streme_uri_key;
+    }
+
+    var stremes = new IDBStore({
+      dbVersion: 4,
+      storeName: 'stremes',
+      keyPath: 'id',
+      autoIncrement: true,
+      onStoreReady: onStoreReady,
+
+      indexes: [ {
+        name: 'name',
+        keyPath: 'name',
+        unique: true,
+        multientry: false
       } ]
     });
+    stremes.objectName = function(streme) {
+      return streme.name;
+    }
 
-    function onStoreReady() {
-      console.log('Store ready: ' + this.storeName);
+    var uris = new IDBStore({
+      dbVersion: 2,
+      storeName: 'uris',
+      keyPath: 'id',
+      autoIncrement: true,
+      onStoreReady: onStoreReady,
+
+      indexes: [ {
+        name: 'url',
+        keyPath: 'url',
+        unique: true,
+        multientry: false
+      } ]
+    });
+    uris.objectName = function(uri) {
+      return uri.url;
+    }
+
+    var getStore = function(storeName) {
+      if ( storeName == 'links' ) {
+        return links;
+      } else if ( storeName == 'stremes' ) {
+        return stremes;
+      } else if ( storeName == 'uris' ) {
+        return uris;
+      } else { alert( 'Unknown store: ' + storeName); }
     }
 
     return {
-      addStreme: function(streme) {
+      addTo: function(storeName, object) {
         var deferred = $q.defer();
+        var store = getStore(storeName);
 
-        stremes.put(streme, function() {
-          deferred.resolve('Added streme: ' + streme.name);
+        store.put(object, function(keyPath) {
+          var objectName = store.objectName(object);
+
+          deferred.resolve({
+            message: 'Added ' + objectName + ' to ' + store.storeName,
+            keyPath: keyPath
+          });
+
         }, function() {
-          deferred.reject('Could not add streme: ' + streme.name);
+          var objectInfo = JSON.stringify(object);
+          deferred.reject('Could not add ' + objectInfo + ' to ' + store.storeName);
         });
 
         return deferred.promise;
       },
 
-      allStremes: function() {
+      getAllFrom: function(storeName) {
         var deferred = $q.defer();
+        var store = getStore(storeName);
 
-        stremes.getAll(function(stremes) {
-          deferred.resolve(stremes);
+        store.getAll(function(objects) {
+          deferred.resolve(objects);
         }, function() {
-          deferred.reject('Could not get all stremes.');
+          deferred.reject('Could not retrive objects from ' + store.storeName);
         });
 
         return deferred.promise; 
+      },
+
+      getFrom: function(storeName, keyPath) {
+        var deferred = $q.defer();
+        var store = getStore(storeName);
+
+        store.get(keyPath, function(object) {
+          deferred.resolve(object);
+        }, function() {
+          deferred.reject('No object found in ' + store.storeName +
+                          'with keyPath: ' + keyPath);
+        });
+
+        return deferred.promise;
+      },
+
+      queryFrom: function(storeName, queryOptions) {
+        var deferred = $q.defer();
+        var store = getStore(storeName);
+
+        if(queryOptions.keyRange) {
+          var keyRangeOptions = queryOptions.keyRange;
+          queryOptions.keyRange = store.makeKeyRange(keyRangeOptions);
+        } else {
+          deferred.reject('Must set a keyRange in queryOptions.');
+          return deferred.promise;
+        }
+
+        store.query(function(objects) {
+          deferred.resolve(objects);
+        }, queryOptions);
+
+        return deferred.promise;
       }
-    }
+    };
+  }
+
+  function LinkStreme($q, DB, Uri) {
+    return {
+      createLink: function(streme, uri) {
+        var createStremeUriKey = function(streme, uri) {
+          return 'streme:' + streme.id + '-uri:' + uri.id
+        };
+
+        var link = {
+          streme_id: streme.id,
+          uri_id: uri.id,
+          streme_uri_key: createStremeUriKey(streme, uri),
+        };
+
+        return DB.addTo('links', link);
+      },
+
+      // TODO: flatten out promise chains in below function
+      // Reference: http://solutionoptimist.com/2013/12/27/javascript-promise-chains-2/
+      findOrCreateUri: function(url) {
+        var deferred = $q.defer();
+
+        // Get normalized url
+        var normUrl = Uri.normalize(url);
+
+        // Search for normalized url in uri store
+        DB.queryFrom('uris', {
+          index: 'url',
+          keyRange: {only: normUrl}
+        }).then(function(foundUris) {
+
+          // Create URI if none exists
+          if (foundUris.length === 0) {
+            var uri = Uri.parse(url);
+            DB.addTo('uris', uri).
+              then(function(result) {
+                console.log(result.message + ' : ' + result.keyPath);
+
+                // Retrieve created uri using keyPath
+                DB.getFrom('uris', result.keyPath).
+                  then(function(found) {
+                    alert('Added: ' + JSON.stringify(found));
+                    deferred.resolve(found);
+                  }, function(message) {
+                    // Error if getFrom fails
+                    deferred.reject(message);
+                  });
+
+              }, function(message) {
+                // Error if addTo fails
+                deferred.reject(message);
+              });
+
+          } else {
+            // Return existing uri
+            deferred.resolve(foundUris[0]);
+          }
+
+        }, function(message) {
+          // Error if queryFrom fails
+          deferred.reject(message);
+        });
+
+        return deferred.promise;
+      }
+    };
+  }
+
+  function Uri() {
+    return {
+      normalize: function(url) {
+        return URI.normalize(url);
+      },
+
+      parse: function(url) {
+        var components = URI.parse(url);
+
+        if( components.errors.length === 0 ) {
+          delete components.errors
+          components.url = URI.normalize(url);
+
+          return components
+        } else {
+          alert('Errors: ' + components.errors.join(', '));
+        }
+      }
+    };
   }
 })();
