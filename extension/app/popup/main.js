@@ -1,21 +1,27 @@
 (function(){
   angular.module('popupApp', ['ui.bootstrap']).
     controller('StremeSelectCtrl',
-               [ '$scope', '$rootScope', '$modal', StremeSelectCtrl ]).
+               [ '$scope', '$modal', 'Shared', StremeSelectCtrl ]).
     controller('DiscoverCtrl', [ '$scope', DiscoverCtrl ]).
     controller('CollectCtrl',
-               [ '$scope', '$rootScope',
-                 'LinkStreme', 'Sessions', 'Tabs', CollectCtrl ]).
+               [ '$scope', 'LinkStreme', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]).
     controller('ShareCtrl',[ '$scope', ShareCtrl]).
     factory('DB', [ '$q', IndexedDB ]).
     factory('LinkStreme', [ '$q', 'DB', 'Uri', LinkStreme ]).
     factory('Sessions', [ ChromeSessions ]).
+    factory('Shared', [ '$rootScope', Shared ]).
     factory('Storage', [ '$q', ChromeStorage ]).
     factory('Tabs', [ '$q', ChromeTabs ]).
     factory('Uri', [ Uri ]);
 
-  function StremeSelectCtrl($scope, $rootScope, $modal) {
+  function StremeSelectCtrl($scope, $modal, Shared) {
     $scope.currentStreme = { name: 'Select Streme...' };
+    $scope.name = 'StremeSelectCtrl';
+
+    // Event Handlers
+    Shared.register($scope, 'currentStreme.update', function(event, streme) {
+      $scope.currentStreme = streme;
+    });
 
     $scope.open = function(stremeType) {
       var modalInstance = $modal.open({
@@ -29,19 +35,35 @@
 
       modalInstance.result.
         then(function(streme) {
-          $scope.currentStreme = streme;
-          $rootScope.$emit('stremeChange', streme);
-        }, function() { console.log('No streme selected.'); });
+          Shared.update('currentStreme', streme);
+        }, function() {
+          console.log('No streme selected.');
+        });
     }
   }
 
   function StremeSelectModalCtrl($scope, $modalInstance, DB, currentStreme, stremeType) {
-    $scope.currentStreme = currentStreme;
+    // TODO: Fix streme selection to work in different contexts
+    $scope.selected = currentStreme;
+
+    var selectTab = function(stremeType) {
+      if ( stremeType == 'linkstreme' ) {
+        $scope.linkstreme.active = true;
+      } else if ( stremeType == 'bookmarks' ) {
+        $scope.bookmarks.active = true;
+      } else if ( stremeType == 'history' ) {
+        $scope.history.active = true;
+      } else {
+        alert('Unknown stremeType: ' + stremeType);
+      }
+    }
+
     $scope.stremeType = stremeType;
 
     $scope.linkstreme = {
-      active: ( stremeType == 'linkstreme' ),
+      active: false,
       heading: "Linkstreme",
+      currentStreme: { name: 'Select...' },
       showNew: false,
       stremes: [],
 
@@ -58,11 +80,14 @@
 
       create: function() {
         $scope.linkstreme.showNew = true;
-        $scope.newStreme = {};
+        $scope.newStreme = { links: [] };
       },
 
       select: function(streme) {
-        $scope.currentStreme = streme;
+        // TODO: Eventually selected should be handled based on
+        // the selected tab when the OK button is clicked
+        $scope.linkstreme.currentStreme = streme;
+        $scope.selected = $scope.linkstreme.currentStreme;
       },
 
       updateStremes: function() {
@@ -76,17 +101,17 @@
     };
 
     $scope.bookmarks = {
-      active: ( stremeType == 'bookmarks' ),
+      active: false,
        heading: "Bookmarks"
     };
 
     $scope.history = {
-      active: ( stremeType == 'history' ),
+      active: false,
       heading: "History"
     };
 
     $scope.ok = function() {
-      $modalInstance.close($scope.currentStreme);
+      $modalInstance.close($scope.selected);
     };
 
     $scope.cancel = function() {
@@ -94,6 +119,7 @@
     };
 
     // Init code
+    selectTab(stremeType);
     $scope.linkstreme.updateStremes();
   }
 
@@ -101,7 +127,16 @@
     $scope.url = 'Discover: http://google.com';
   }
 
-  function CollectCtrl($scope, $rootScope, LinkStreme, Sessions, Tabs){
+  function CollectCtrl($scope, LinkStreme, Shared, Sessions, Tabs){
+    // Event Handlers
+    $scope.name = 'CollectCtrl';
+
+    $scope.currentStreme = { links: [] };
+
+    Shared.register($scope, 'currentStreme.update', function(event, streme) {
+      $scope.currentStreme = streme;
+    });
+
     // Private methods
     var pFail = function(reason) { alert('Failed: ' + reason); }
     var pNotify = function(update) { alert('Notify: ' + update); }
@@ -141,13 +176,6 @@
         }, pFail, pNotify);
     }
 
-    // Event Handlers
-    var unbind = $rootScope.$on('stremeChange', function(event, streme) {
-      $scope.currentStreme = streme;
-    });
-    // Unbind callbacks for this controller defined on $rootScope
-    $scope.$on('$destroy', unbind);
-
     // Scope methods
     $scope.closeTab = function(tab, $event) {
       // Disable click event for close tab element
@@ -162,15 +190,20 @@
     }
 
     $scope.saveLinks = function() {
-      if (!$scope.currentStreme) {
+      if (!$scope.currentStreme.id) {
         alert('No streme selected.');
         return;
       }
 
+      // This function takes a uri and creates a link in currrentStreme
+      // It returns a promise that will look up the link_id.
       var createLink = function(uri) {
         return LinkStreme.createLink($scope.currentStreme, uri).
           then(function(link_id) {
-            // TODO: Add link_id to links for this streme
+            // TODO: Add link_id to links for currentStreme
+            // Then update the shared currentStreme
+            $scope.currentStreme.links.push(link_id);
+
             console.log('I should do something with link #' + link_id);
           }, function(message) {
             alert(message);
@@ -211,6 +244,13 @@
     $scope.url = 'Share: http://google.com';
   }
 
+
+
+
+
+  // Services
+
+  // Chrome Services
   function ChromeStorage($q) {
     var storage;
     // if (type == 'local') {
@@ -326,11 +366,37 @@
     };
   }
 
+
+  // Misc Library Services
+  function Uri() {
+    return {
+      normalize: function(url) {
+        return URI.normalize(url);
+      },
+
+      parse: function(url) {
+        var components = URI.parse(url);
+
+        if( components.errors.length === 0 ) {
+          delete components.errors
+          components.url = URI.normalize(url);
+
+          return components
+        } else {
+          alert('Errors: ' + components.errors.join(', '));
+        }
+      }
+    };
+  }
+
+
+  // Database Services
   function IndexedDB($q) {
     var onStoreReady = function() {
       console.log('Store ready: ' + this.storeName);
     }
 
+    // Data stores should be created in the LinkStreme service
     var links = new IDBStore({
       dbVersion: 2,
       storeName: 'links',
@@ -472,8 +538,71 @@
     };
   }
 
+
+  // State Services
+  function Shared($rootScope) {
+    var state = {};
+
+    var update = function(key, data) {
+      var eventName = key + '.update';
+
+      state[key] = data;
+      $rootScope.$broadcast(eventName, state[key]);
+    };
+
+    var register = function($scope, eventName, callback) {
+      $scope.$on(eventName, function(event, data) {
+        callback(event, data);
+      });
+    };
+
+    return {
+      update: update,
+      state: state,
+      register: register
+    };
+  }
+
+
+  // Helper Services
   function LinkStreme($q, DB, Uri) {
+    var getStremeUriKey = function(streme, uri) {
+      return 'streme:' + streme.id + '-uri:' + uri.id
+    };
+
     var LS = {};
+
+    LS.Link = {
+      create: function(streme, uri) {
+        if(!streme.id) {
+          alert('No ID for streme: ' + JSON.stringify(streme));
+        }
+
+        if(!uri.id) {
+          alert('No ID for URI: ' + JSON.stringify(uri));
+        }
+
+        var link = {
+          streme_id: streme.id,
+          uri_id: uri.id,
+          streme_uri_key: getStremeUriKey(streme, uri),
+        };
+
+        return DB.addTo('links', link);
+      }
+    };
+
+
+    LS.Streme = {
+      create: function(streme) {
+        if(!streme.name) {
+          alert('No name found for streme: ' + JSON.stringify(streme));
+        }
+        streme.links = streme.links || [];
+
+        return DB.addTo('stremes', streme);
+      }
+    };
 
     // URI Helpers
     LS.Uri = {
@@ -499,19 +628,7 @@
 
     return {
       // Link Helpers
-      createLink: function(streme, uri) {
-        var createStremeUriKey = function(streme, uri) {
-          return 'streme:' + streme.id + '-uri:' + uri.id
-        };
-
-        var link = {
-          streme_id: streme.id,
-          uri_id: uri.id,
-          streme_uri_key: createStremeUriKey(streme, uri),
-        };
-
-        return DB.addTo('links', link);
-      },
+      createLink: LS.Link.create,
 
 
       // URI Helpers
@@ -547,24 +664,4 @@
     };
   }
 
-  function Uri() {
-    return {
-      normalize: function(url) {
-        return URI.normalize(url);
-      },
-
-      parse: function(url) {
-        var components = URI.parse(url);
-
-        if( components.errors.length === 0 ) {
-          delete components.errors
-          components.url = URI.normalize(url);
-
-          return components
-        } else {
-          alert('Errors: ' + components.errors.join(', '));
-        }
-      }
-    };
-  }
 })();

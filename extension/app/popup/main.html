@@ -16,7 +16,7 @@
           <div class="modal-body">
             <tabset>
               <tab heading="{{linkstreme.heading}}" active="linkstreme.active">
-                Selected: <input ng-model="currentStreme.name"></input>
+                Selected: <input ng-model="linkstreme.currentStreme['name']"></input>
                 <ul>
                   <li ng-repeat="streme in linkstreme.stremes"
                       ng-click="linkstreme.select(streme)">{{streme.name}}</li>
@@ -80,6 +80,10 @@
                     ng-click="saveLinks()">Save Links</button>
             <button type="button" class="btn btn-default"
                     ng-click="undoCloseTab()">Undo Tab Close</button>
+
+            <br /><span ng-repeat="link_id in currentStreme.links">
+              {{ link_id + ' : ' }}
+            </span>
 
             <accordion>
               <div ng-repeat="tab in activeTabs">
