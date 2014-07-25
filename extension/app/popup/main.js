@@ -523,67 +523,27 @@
 
       findOrCreateUri: function(url) {
         var createIfMissing = function(foundUris) {
+          var deferred = $q.defer();
+
           // Create URI if none exists
           if (foundUris.length === 0) {
             LS.Uri.create(url).
               then(LS.Uri.get).
               then(function(uri) {
                 alert('Added: ' + JSON.stringify(uri));
-                return uri;
+                deferred.resolve(uri);
               });
           } else {
-            return foundUris[0];
+            deferred.resolve(foundUris[0]);
           }
+
+          return deferred.promise;
         };
 
         return LS.Uri.find(url).
           then(createIfMissing);
-      },
+      }
 
-      // TODO: flatten out promise chains in below function
-      // Reference: http://solutionoptimist.com/2013/12/27/javascript-promise-chains-2/
-      // findOrCreateUri: function(url) {
-      //   var deferred = $q.defer();
-      //   // Search for normalized url in uri store
-      //   DB.queryFrom('uris', {
-      //     index: 'url',
-      //     keyRange: {only: normUrl}
-      //   }).then(function(foundUris) {
-
-      //     // Create URI if none exists
-      //     if (foundUris.length === 0) {
-      //       var uri = Uri.parse(url);
-      //       DB.addTo('uris', uri).
-      //         then(function(result) {
-      //           console.log(result.message + ' : ' + result.keyPath);
-
-      //           // Retrieve created uri using keyPath
-      //           DB.getFrom('uris', result.keyPath).
-      //             then(function(found) {
-      //               alert('Added: ' + JSON.stringify(found));
-      //               deferred.resolve(found);
-      //             }, function(message) {
-      //               // Error if getFrom fails
-      //               deferred.reject(message);
-      //             });
-
-      //         }, function(message) {
-      //           // Error if addTo fails
-      //           deferred.reject(message);
-      //         });
-
-      //     } else {
-      //       // Return existing uri
-      //       deferred.resolve(foundUris[0]);
-      //     }
-
-      //   }, function(message) {
-      //     // Error if queryFrom fails
-      //     deferred.reject(message);
-      //   });
-
-      //   return deferred.promise;
-      // }
     };
   }
 
