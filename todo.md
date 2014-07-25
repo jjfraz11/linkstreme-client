@@ -57,6 +57,7 @@
 
   * URI - polymorphic type for a web resource by resource type
     * ID
+    * Title
     * Domain
     * Subdomain
     * Path
@@ -73,6 +74,7 @@
 
   * Streme
     * Links - foreign key list
+    * Name 
 
   * Tag - subtype of keyword
     * value
