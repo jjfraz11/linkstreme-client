@@ -47,11 +47,10 @@
 
       add: function(streme) {
         DB.addTo('stremes', streme).
-          then(function(result) {
+          then(function(streme_id) {
             $scope.linkstreme.showNew = false;
             $scope.linkstreme.updateStremes();
             $scope.linkstreme.select(streme);
-            console.log(result.message + ' : ' + result.keyPath);
           }, function(message) {
             alert(message);
           });
@@ -168,20 +167,11 @@
         return;
       }
 
-      // Helper functions for saveLinks
-      var getUri = function(url) {
-        return LinkStreme.findOrCreateUri(url).
-          then(function(uri) {
-            return uri;
-          }, function(message) {
-            alert(message);
-          });
-      };
-
       var createLink = function(uri) {
         return LinkStreme.createLink($scope.currentStreme, uri).
-          then(function(result) {
-            console.log(result.message + ' : ' + result.keyPath);
+          then(function(link_id) {
+            // TODO: Add link_id to links for this streme
+            console.log('I should do something with link #' + link_id);
           }, function(message) {
             alert(message);
           });
@@ -192,7 +182,8 @@
         if(tab.selected) {
           console.log('Selected: ' + tab.title);
 
-          getUri(tab.url).then(createLink);
+          LinkStreme.findOrCreateUri(tab.url).
+            then(createLink);
         }
       });
     }
@@ -421,15 +412,13 @@
 
         store.put(object, function(keyPath) {
           var objectName = store.objectName(object);
-
-          deferred.resolve({
-            message: 'Added ' + objectName + ' to ' + store.storeName,
-            keyPath: keyPath
-          });
-
+          console.log('Added ' + objectName + ' to ' +
+                      store.storeName + ' : ' + keyPath);
+          deferred.resolve(keyPath);
         }, function() {
           var objectInfo = JSON.stringify(object);
-          deferred.reject('Could not add ' + objectInfo + ' to ' + store.storeName);
+          deferred.reject('Could not add ' + objectInfo +
+                          ' to ' + store.storeName);
         });
 
         return deferred.promise;
@@ -484,7 +473,32 @@
   }
 
   function LinkStreme($q, DB, Uri) {
+    var LS = {};
+
+    // URI Helpers
+    LS.Uri = {
+      create: function(url) {
+        var uri = Uri.parse(url);
+        return DB.addTo('uris', uri);
+      },
+
+      find: function(url) {
+        // Get normalized url
+        var normUrl = Uri.normalize(url);
+
+        return DB.queryFrom('uris', {
+          index: 'url',
+          keyRange: {only: normUrl}
+        });
+      },
+
+      get: function(uri_id) {
+        return DB.getFrom('uris', uri_id);
+      }
+    };
+
     return {
+      // Link Helpers
       createLink: function(streme, uri) {
         var createStremeUriKey = function(streme, uri) {
           return 'streme:' + streme.id + '-uri:' + uri.id
@@ -499,54 +513,77 @@
         return DB.addTo('links', link);
       },
 
-      // TODO: flatten out promise chains in below function
-      // Reference: http://solutionoptimist.com/2013/12/27/javascript-promise-chains-2/
+
+      // URI Helpers
+      createUri: LS.Uri.create,
+
+      findUri: LS.Uri.find,
+
+      getUri: LS.Uri.get,
+
       findOrCreateUri: function(url) {
-        var deferred = $q.defer();
-
-        // Get normalized url
-        var normUrl = Uri.normalize(url);
-
-        // Search for normalized url in uri store
-        DB.queryFrom('uris', {
-          index: 'url',
-          keyRange: {only: normUrl}
-        }).then(function(foundUris) {
-
+        var createIfMissing = function(foundUris) {
           // Create URI if none exists
           if (foundUris.length === 0) {
-            var uri = Uri.parse(url);
-            DB.addTo('uris', uri).
-              then(function(result) {
-                console.log(result.message + ' : ' + result.keyPath);
-
-                // Retrieve created uri using keyPath
-                DB.getFrom('uris', result.keyPath).
-                  then(function(found) {
-                    alert('Added: ' + JSON.stringify(found));
-                    deferred.resolve(found);
-                  }, function(message) {
-                    // Error if getFrom fails
-                    deferred.reject(message);
-                  });
-
-              }, function(message) {
-                // Error if addTo fails
-                deferred.reject(message);
+            LS.Uri.create(url).
+              then(LS.Uri.get).
+              then(function(uri) {
+                alert('Added: ' + JSON.stringify(uri));
+                return uri;
               });
-
           } else {
-            // Return existing uri
-            deferred.resolve(foundUris[0]);
+            return foundUris[0];
           }
+        };
 
-        }, function(message) {
-          // Error if queryFrom fails
-          deferred.reject(message);
-        });
+        return LS.Uri.find(url).
+          then(createIfMissing);
+      },
 
-        return deferred.promise;
-      }
+      // TODO: flatten out promise chains in below function
+      // Reference: http://solutionoptimist.com/2013/12/27/javascript-promise-chains-2/
+      // findOrCreateUri: function(url) {
+      //   var deferred = $q.defer();
+      //   // Search for normalized url in uri store
+      //   DB.queryFrom('uris', {
+      //     index: 'url',
+      //     keyRange: {only: normUrl}
+      //   }).then(function(foundUris) {
+
+      //     // Create URI if none exists
+      //     if (foundUris.length === 0) {
+      //       var uri = Uri.parse(url);
+      //       DB.addTo('uris', uri).
+      //         then(function(result) {
+      //           console.log(result.message + ' : ' + result.keyPath);
+
+      //           // Retrieve created uri using keyPath
+      //           DB.getFrom('uris', result.keyPath).
+      //             then(function(found) {
+      //               alert('Added: ' + JSON.stringify(found));
+      //               deferred.resolve(found);
+      //             }, function(message) {
+      //               // Error if getFrom fails
+      //               deferred.reject(message);
+      //             });
+
+      //         }, function(message) {
+      //           // Error if addTo fails
+      //           deferred.reject(message);
+      //         });
+
+      //     } else {
+      //       // Return existing uri
+      //       deferred.resolve(foundUris[0]);
+      //     }
+
+      //   }, function(message) {
+      //     // Error if queryFrom fails
+      //     deferred.reject(message);
+      //   });
+
+      //   return deferred.promise;
+      // }
     };
   }
 
