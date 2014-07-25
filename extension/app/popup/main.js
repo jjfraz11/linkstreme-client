@@ -1,7 +1,7 @@
 (function(){
   angular.module('popupApp', ['ui.bootstrap']).
     controller('StremeSelectCtrl',
-               [ '$scope', '$modal', 'Shared', StremeSelectCtrl ]).
+               [ '$scope', '$modal', 'LinkStreme', 'Shared', StremeSelectCtrl ]).
     controller('DiscoverCtrl', [ '$scope', DiscoverCtrl ]).
     controller('CollectCtrl',
                [ '$scope', 'LinkStreme', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]).
@@ -14,7 +14,7 @@
     factory('Tabs', [ '$q', ChromeTabs ]).
     factory('Uri', [ Uri ]);
 
-  function StremeSelectCtrl($scope, $modal, Shared) {
+  function StremeSelectCtrl($scope, $modal, LinkStreme, Shared) {
     $scope.currentStreme = { name: 'Select Streme...' };
     $scope.name = 'StremeSelectCtrl';
 
@@ -33,16 +33,20 @@
         }
       });
 
+      var updateShared = function(result) {
+        Shared.update('currentStreme', result.streme);
+        Shared.update('stremeLinks', result.links);
+      }
+
       modalInstance.result.
-        then(function(streme) {
-          Shared.update('currentStreme', streme);
-        }, function() {
-          console.log('No streme selected.');
-        });
+        then(LinkStreme.getStremeLinks,
+             function() { console.log('No streme selected.'); }).
+        then(updateShared);
     }
   }
 
-  function StremeSelectModalCtrl($scope, $modalInstance, DB, currentStreme, stremeType) {
+  function StremeSelectModalCtrl($scope, $modalInstance, LinkStreme,
+                                 currentStreme, stremeType) {
     // TODO: Fix streme selection to work in different contexts
     $scope.selected = currentStreme;
 
@@ -68,7 +72,7 @@
       stremes: [],
 
       add: function(streme) {
-        DB.addTo('stremes', streme).
+        LinkStreme.createStreme(streme).
           then(function(streme_id) {
             $scope.linkstreme.showNew = false;
             $scope.linkstreme.updateStremes();
@@ -91,7 +95,7 @@
       },
 
       updateStremes: function() {
-        DB.getAllFrom('stremes').
+        LinkStreme.getAllStremes().
           then(function(stremes) {
             $scope.linkstreme.stremes = stremes;
           }, function(error) {
@@ -548,6 +552,8 @@
 
       state[key] = data;
       $rootScope.$broadcast(eventName, state[key]);
+
+      alert('Updated ' + key + ' : ' + JSON.stringify(state[key]));
     };
 
     var register = function($scope, eventName, callback) {
@@ -601,6 +607,34 @@
         streme.links = streme.links || [];
 
         return DB.addTo('stremes', streme);
+      },
+
+      getAll: function() {
+        return DB.getAllFrom('stremes');
+      },
+
+      getLinks: function(streme) {
+        var deferred = $q.defer();
+        var result = {
+          streme: streme,
+          links: []
+        };
+
+        if (streme.hasOwnProperty('id')) {
+          DB.queryFrom('links', {
+            index: 'streme_id',
+            keyRange: { only: streme.id }
+          }).then(function(foundLinks) {
+            result.links = foundLinks;
+            deferred.resolve(result);
+          }, function(message) {
+            deferred.reject(message);
+          });
+        } else {
+          deferred.reject('No ID for streme: ' + JSON.stringify(streme));
+        }
+
+        return deferred.promise;
       }
     };
 
@@ -630,12 +664,14 @@
       // Link Helpers
       createLink: LS.Link.create,
 
+      // Streme Helpers
+      createStreme: LS.Streme.create,
+      getAllStremes: LS.Streme.getAll,
+      getStremeLinks: LS.Streme.getLinks,
 
       // URI Helpers
       createUri: LS.Uri.create,
-
       findUri: LS.Uri.find,
-
       getUri: LS.Uri.get,
 
       findOrCreateUri: function(url) {
