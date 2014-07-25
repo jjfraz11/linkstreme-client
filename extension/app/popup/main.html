@@ -69,7 +69,15 @@
       <!-- Context Tabs -->
       <tabset>
         <!-- Discover Tab -->
-        <tab heading="Discover">Empty</tab>
+        <tab heading="Discover">
+          <div ng-controller="DiscoverCtrl">
+            <ul>
+              <li ng-repeat="link in stremeLinks">
+                {{ link.streme_id + ' - ' + link.uri_id }}
+              </li>
+            </ul>
+          </div>
+        </tab>
 
         <!-- Collecct Tab -->
         <tab heading="Collect">
@@ -84,6 +92,7 @@
             <br /><span ng-repeat="link_id in currentStreme.links">
               {{ link_id + ' : ' }}
             </span>
+            <br /><input type="text" ng-model="linkString"></input>
 
             <accordion>
               <div ng-repeat="tab in activeTabs">

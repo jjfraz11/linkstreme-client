@@ -1,20 +1,22 @@
 (function(){
   angular.module('popupApp', ['ui.bootstrap']).
     controller('StremeSelectCtrl',
-               [ '$scope', '$modal', 'LinkStreme', 'Shared', StremeSelectCtrl ]).
-    controller('DiscoverCtrl', [ '$scope', DiscoverCtrl ]).
+               [ '$scope', '$modal', 'Shared', StremeSelectCtrl ]).
+    controller('DiscoverCtrl',
+               [ '$scope', 'Shared', DiscoverCtrl ]).
     controller('CollectCtrl',
                [ '$scope', 'LinkStreme', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]).
-    controller('ShareCtrl',[ '$scope', ShareCtrl]).
+    controller('ShareCtrl',
+               [ '$scope', ShareCtrl]).
     factory('DB', [ '$q', IndexedDB ]).
     factory('LinkStreme', [ '$q', 'DB', 'Uri', LinkStreme ]).
     factory('Sessions', [ ChromeSessions ]).
-    factory('Shared', [ '$rootScope', Shared ]).
+    factory('Shared', [ '$rootScope', 'LinkStreme', Shared ]).
     factory('Storage', [ '$q', ChromeStorage ]).
     factory('Tabs', [ '$q', ChromeTabs ]).
     factory('Uri', [ Uri ]);
 
-  function StremeSelectCtrl($scope, $modal, LinkStreme, Shared) {
+  function StremeSelectCtrl($scope, $modal, Shared) {
     $scope.currentStreme = { name: 'Select Streme...' };
     $scope.name = 'StremeSelectCtrl';
 
@@ -33,15 +35,9 @@
         }
       });
 
-      var updateShared = function(result) {
-        Shared.update('currentStreme', result.streme);
-        Shared.update('stremeLinks', result.links);
-      }
-
       modalInstance.result.
-        then(LinkStreme.getStremeLinks,
-             function() { console.log('No streme selected.'); }).
-        then(updateShared);
+        then(function(streme) { Shared.update('currentStreme', streme); },
+             function() { console.log('No streme selected.'); });
     }
   }
 
@@ -127,8 +123,12 @@
     $scope.linkstreme.updateStremes();
   }
 
-  function DiscoverCtrl($scope){
+  function DiscoverCtrl($scope, Shared){
     $scope.url = 'Discover: http://google.com';
+
+    Shared.register($scope, 'stremeLinks.update', function(event, links) {
+      $scope.stremeLinks = links;
+    });
   }
 
   function CollectCtrl($scope, LinkStreme, Shared, Sessions, Tabs){
@@ -139,6 +139,11 @@
 
     Shared.register($scope, 'currentStreme.update', function(event, streme) {
       $scope.currentStreme = streme;
+    });
+
+    Shared.register($scope, 'stremeLinks.update', function(event, links) {
+      $scope.stremeLinks = links;
+      $scope.linkString = JSON.stringify(links);
     });
 
     // Private methods
@@ -544,7 +549,7 @@
 
 
   // State Services
-  function Shared($rootScope) {
+  function Shared($rootScope, LinkStreme) {
     var state = {};
 
     var update = function(key, data) {
@@ -561,6 +566,14 @@
         callback(event, data);
       });
     };
+
+    // Register callback to update links when currentStreme updated.
+    register($rootScope, 'currentStreme.update', function(event, streme) {
+      LinkStreme.getStremeLinks(streme).
+        then(function(foundLinks) {
+          update('stremeLinks', foundLinks);
+        });
+    });
 
     return {
       update: update,
@@ -615,18 +628,13 @@
 
       getLinks: function(streme) {
         var deferred = $q.defer();
-        var result = {
-          streme: streme,
-          links: []
-        };
 
         if (streme.hasOwnProperty('id')) {
           DB.queryFrom('links', {
             index: 'streme_id',
             keyRange: { only: streme.id }
           }).then(function(foundLinks) {
-            result.links = foundLinks;
-            deferred.resolve(result);
+            deferred.resolve(foundLinks);
           }, function(message) {
             deferred.reject(message);
           });
