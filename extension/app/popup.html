@@ -1,0 +1,136 @@
+<html>
+  <head>
+    <title>Linkstreme Client</title>
+    <link rel="stylesheet" href="/vendor/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="main.css" />
+  </head>
+
+  <body>
+    <div ng-app="popupApp">
+
+      <!-- Streme Selector -->
+      <div ng-controller="StremeSelectCtrl">
+        <!-- Streme Select Modal -->
+        <!-- TODO: Move modal template to seperate file -->
+        <script type="text/ng-template" id="streme_select_modal.html">
+          <div class="modal-body">
+            <tabset>
+              <tab heading="{{linkstreme.heading}}" active="linkstreme.active">
+                Selected: <input ng-model="linkstreme.currentStreme['name']"></input>
+                <ul>
+                  <li ng-repeat="streme in linkstreme.stremes"
+                      ng-click="linkstreme.select(streme)">{{streme.name}}</li>
+                </ul>
+
+                <!-- TODO: Animate collapse more gracefully on save. -->
+                <div collapse="!linkstreme.showNew">
+                  <form novalidate class="simple-form">
+                    Name: <input type="text" ng-model="newStreme.name" />
+                    <button ng-click="linkstreme.add(newStreme)">Save</button>
+                    <button ng-click="linkstreme.showNew = false">Cancel</button>
+                  </form>
+                </div>
+
+                <a ng-click="linkstreme.create()">
+                  <i class="glyphicon glyphicon-plus"></i>New Streme
+                </a>
+              </tab>
+
+              <tab heading="{{bookmarks.heading}}" active="bookmarks.active">
+              </tab>
+
+              <tab heading="{{history.heading}}" active="history.active">
+              </tab>
+            </tabset>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="ok()">OK</button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+          </div>
+        </script>
+
+        <!-- TODO: This input should fit default text properly -->
+        <input type="text" ng-model="currentStreme.name" />
+        <div class="btn-group" dropdown>
+          <button type="button" class="btn btn-primary dropdown-toggle"
+                  ng-disabled="disabled">Select</button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a ng-click="open('linkstreme')">Linkstreme ...</a></li>
+            <li><a ng-click="open('bookmarks')">Bookmarks ...</a></li>
+            <li><a ng-click="open('history')">History ...</a></li>
+            <!-- TODO: Add functionality to list recently closed tabs
+                 May want to mirror this functionality in collect to allow
+                 adding links from closed tabs. May want to merge with History. -->
+            <li><a ng-click="console.log('recent')">Recent ...</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Context Tabs -->
+      <tabset>
+        <!-- Discover Tab -->
+        <tab heading="Discover">
+          <div ng-controller="DiscoverCtrl">
+            <ul>
+              <li ng-repeat="link in stremeLinks">
+                {{ link.streme_id + ' - ' + link.uri_id }}
+              </li>
+            </ul>
+          </div>
+        </tab>
+
+        <!-- Collecct Tab -->
+        <tab heading="Collect">
+          <div ng-controller="CollectCtrl">
+
+            <!-- TODO: This should be split button dropdown with more opts -->
+            <button type="button" class="btn btn-primary"
+                    ng-click="saveLinks()">Save Links</button>
+            <button type="button" class="btn btn-default"
+                    ng-click="undoCloseTab()">Undo Tab Close</button>
+
+            <br /><span ng-repeat="link_id in currentStreme.links">
+              {{ link_id + ' : ' }}
+            </span>
+            <br /><input type="text" ng-model="linkString"></input>
+
+            <accordion>
+              <div ng-repeat="tab in activeTabs">
+                <accordion-group is-open="tab.active">
+                  <accordion-heading>
+                    <i class="glyphicon glyphicon-remove"
+                       tooltip="Close Tab" ng-click="closeTab(tab,$event);"></i>
+                    <input type="checkbox" ng-model="tab.selected"
+                           ng-click="toggleTab(tab, $event);"></input>
+                    <span class="link-title">#{{ tab.index }} - {{ tab.title }}</span><br />
+                    <span class="link-url">{{ tab.url }}</span>
+
+                  </accordion-heading>
+                </accordion-group>
+              </div>
+            </accordion
+>
+          </div>
+        </tab>
+
+        <!-- Share Tab -->
+        <tab heading="Share">
+          <div ng-controller="ShareCtrl">
+            {{ url }}
+          </div>
+        </tab>
+      </tabset>
+    </div>
+
+    <!-- Framework level dependencies -->
+    <script type="text/javascript" src="/vendor/js/angular.min.js"></script>
+    <script type="text/javascript" src="/vendor/js/ui-bootstrap-tpls-0.11.0.min.js"></script>
+
+    <!-- Module level dependencies -->
+    <script type="text/javascript" src="/vendor/js/idbstore.js"></script>
+    <script type="text/javascript" src="/vendor/js/uri.min.js"></script>
+
+    <!-- Application Script -->
+    <script type="text/javascript" src="main.js"></script>
+  </body>
+</html>
