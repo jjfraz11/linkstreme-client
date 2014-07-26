@@ -2,9 +2,9 @@
 
 angular.module('LS.controllers').
   controller('CollectCtrl',
-             [ '$scope', 'LinkStreme', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]);
+             [ '$scope', 'Data', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]);
 
-function CollectCtrl($scope, LinkStreme, Shared, Sessions, Tabs){
+function CollectCtrl($scope, Data, Shared, Sessions, Tabs){
   // Event Handlers
   $scope.name = 'CollectCtrl';
 
@@ -80,7 +80,7 @@ function CollectCtrl($scope, LinkStreme, Shared, Sessions, Tabs){
     // This function takes a uri and creates a link in currrentStreme
     // It returns a promise that will look up the link_id.
     var createLink = function(uri) {
-      return LinkStreme.createLink($scope.currentStreme, uri).
+      return Data.createLink($scope.currentStreme, uri).
         then(function(link_id) {
           // TODO: Add link_id to links for currentStreme
           // Then update the shared currentStreme
@@ -97,7 +97,7 @@ function CollectCtrl($scope, LinkStreme, Shared, Sessions, Tabs){
       if(tab.selected) {
         console.log('Selected: ' + tab.title);
 
-        LinkStreme.findOrCreateUri(tab.url).
+        Data.findOrCreateUri(tab.url).
           then(createLink);
       }
     });

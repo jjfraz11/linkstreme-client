@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module("Uri", []).
+angular.module("LS.utilities").
   factory('Uri', [ Uri ]);
 
 // Misc Library Services

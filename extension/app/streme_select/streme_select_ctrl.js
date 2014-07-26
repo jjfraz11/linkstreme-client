@@ -1,8 +1,7 @@
 'use strict';
 
-angular.module('LS.controllers', []).
-  controller('StremeSelectCtrl',
-             [ '$scope', '$modal', 'Shared', StremeSelectCtrl ]);
+angular.module('LS.controllers').
+  controller('StremeSelectCtrl', [ '$scope', '$modal', 'Shared', StremeSelectCtrl ]);
 
 function StremeSelectCtrl($scope, $modal, Shared) {
   $scope.currentStreme = { name: 'Select Streme...' };
@@ -29,7 +28,9 @@ function StremeSelectCtrl($scope, $modal, Shared) {
   }
 }
 
-function StremeSelectModalCtrl($scope, $modalInstance, LinkStreme,
+// TODO: Should move modal ctrl to seperate file. Need to figure out
+// IF you can specify the modal controller by string name instead of constant
+function StremeSelectModalCtrl($scope, $modalInstance, Data,
                                currentStreme, stremeType) {
   // TODO: Fix streme selection to work in different contexts
   $scope.selected = currentStreme;
@@ -56,7 +57,7 @@ function StremeSelectModalCtrl($scope, $modalInstance, LinkStreme,
     stremes: [],
 
     add: function(streme) {
-      LinkStreme.createStreme(streme).
+      Data.createStreme(streme).
         then(function(streme_id) {
           $scope.linkstreme.showNew = false;
           $scope.linkstreme.updateStremes();
@@ -79,7 +80,7 @@ function StremeSelectModalCtrl($scope, $modalInstance, LinkStreme,
     },
 
     updateStremes: function() {
-      LinkStreme.getAllStremes().
+      Data.getAllStremes().
         then(function(stremes) {
           $scope.linkstreme.stremes = stremes;
         }, function(error) {

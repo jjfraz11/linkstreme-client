@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module("IndexedDB", []).
+angular.module('LS.utilities').
   factory('DB', [ '$q', IndexedDB ]);
 
 // Database Services

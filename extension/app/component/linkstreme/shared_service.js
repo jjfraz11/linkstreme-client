@@ -1,37 +1,39 @@
 'use strict';
 
-angular.module('LS.Shared', [ 'LS.Data' ]).
-  factory('Shared', [ '$rootScope', 'LinkStreme', Shared ]);
+(function(){
+  angular.module('LS.services').
+    factory('Shared', [ '$rootScope', 'Data', Shared ]);
 
-function Shared($rootScope, LinkStreme) {
-  var state = {};
+  function Shared($rootScope, Data) {
+    var state = {};
 
-  var update = function(key, data) {
-    var eventName = key + '.update';
+    var update = function(key, data) {
+      var eventName = key + '.update';
 
-    state[key] = data;
-    $rootScope.$broadcast(eventName, state[key]);
+      state[key] = data;
+      $rootScope.$broadcast(eventName, state[key]);
 
-    alert('Updated ' + key + ' : ' + JSON.stringify(state[key]));
-  };
+      alert('Updated ' + key + ' : ' + JSON.stringify(state[key]));
+    };
 
-  var register = function($scope, eventName, callback) {
-    $scope.$on(eventName, function(event, data) {
-      callback(event, data);
-    });
-  };
-
-  // Register callback to update links when currentStreme updated.
-  register($rootScope, 'currentStreme.update', function(event, streme) {
-    LinkStreme.getStremeLinks(streme).
-      then(function(foundLinks) {
-        update('stremeLinks', foundLinks);
+    var register = function($scope, eventName, callback) {
+      $scope.$on(eventName, function(event, data) {
+        callback(event, data);
       });
-  });
+    };
 
-  return {
-    update: update,
-    state: state,
-    register: register
-  };
-}
+    // Register callback to update links when currentStreme updated.
+    register($rootScope, 'currentStreme.update', function(event, streme) {
+      Data.getStremeLinks(streme).
+        then(function(foundLinks) {
+          update('stremeLinks', foundLinks);
+        });
+    });
+
+    return {
+      update: update,
+      state: state,
+      register: register
+    };
+  }
+})();
