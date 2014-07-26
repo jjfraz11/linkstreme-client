@@ -1,14 +1,27 @@
 (function(){
-  angular.module('popupApp', ['ui.bootstrap', 'LS.controllers' ]).
+  angular.module('popupApp', ['ui.bootstrap', 'LS.controllers', 'LS.chrome' ]).
     factory('DB', [ '$q', IndexedDB ]).
-    factory('LinkStreme', [ '$q', 'DB', 'Uri', LinkStreme ]).
-    factory('Shared', [ '$rootScope', 'LinkStreme', Shared ]).
+
     factory('Sessions', [ ChromeSessions ]).
     factory('Storage', [ '$q', ChromeStorage ]).
     factory('Tabs', [ '$q', ChromeTabs ]).
+
+    factory('LinkStreme', [ '$q', 'DB', 'Uri', LinkStreme ]).
+    factory('Shared', [ '$rootScope', 'LinkStreme', Shared ]).
     factory('Uri', [ Uri ]);
 
   // Services
+  function ChromeSessions() {
+    return {
+      restore: function(restoreCallback) {
+        chrome.sessions.restore(restoreCallback);
+      },
+
+      restoreLastTab: function() {
+        chrome.sessions.restore();
+      }
+    };
+  }
 
   // Chrome Services
   function ChromeStorage($q) {
@@ -59,17 +72,6 @@
     };
   }
 
-  function ChromeSessions() {
-    return {
-      restore: function(restoreCallback) {
-        chrome.sessions.restore(restoreCallback);
-      },
-
-      restoreLastTab: function() {
-        chrome.sessions.restore();
-      }
-    };
-  }
 
   function ChromeTabs($q) {
     return {
