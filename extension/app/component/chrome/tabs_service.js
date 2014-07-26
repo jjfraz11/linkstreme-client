@@ -1,9 +1,9 @@
  'use strict';
 
-angular.module("LS.chrome", []).
-  factory('Tabs2', [ '$q', ChromeTabs2 ]);
+angular.module("LS.chrome").
+  factory('Tabs', [ '$q', ChromeTabs ]);
 
-function ChromeTabs2($q) {
+function ChromeTabs($q) {
   return {
     active: function() {
       var queryParams = {

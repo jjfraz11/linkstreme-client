@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module("LS.controllers", []).
+angular.module("LS.controllers").
   controller('ShareCtrl', [ '$scope', ShareCtrl]);
 
 function ShareCtrl($scope){

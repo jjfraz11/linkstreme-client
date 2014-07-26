@@ -1,132 +1,17 @@
 (function(){
+    // Setup Dependencies for Linkstreme Modules. This file must be required first.
+  angular.module('LS.chrome', []);
+  angular.module('LS.controllers', [ 'LS.chrome' ]);
+  angular.module('LS.services', []);
+
   angular.module('popupApp', ['ui.bootstrap', 'LS.controllers', 'LS.chrome' ]).
     factory('DB', [ '$q', IndexedDB ]).
-
-    factory('Sessions', [ ChromeSessions ]).
-    factory('Storage', [ '$q', ChromeStorage ]).
-    factory('Tabs', [ '$q', ChromeTabs ]).
 
     factory('LinkStreme', [ '$q', 'DB', 'Uri', LinkStreme ]).
     factory('Shared', [ '$rootScope', 'LinkStreme', Shared ]).
     factory('Uri', [ Uri ]);
 
   // Services
-  function ChromeSessions() {
-    return {
-      restore: function(restoreCallback) {
-        chrome.sessions.restore(restoreCallback);
-      },
-
-      restoreLastTab: function() {
-        chrome.sessions.restore();
-      }
-    };
-  }
-
-  // Chrome Services
-  function ChromeStorage($q) {
-    var storage;
-    // if (type == 'local') {
-    if (true) {
-      // storage = chrome.storage.local;
-    } else {
-      alert('Unknown chrome storage type: ' + type);
-      return {};
-    }
-
-    return {
-      get: function(key) {
-        var deferred = $q.defer();
-
-        storage.get(key, function(found){
-          if(chrome.runtime.lastError) {
-            var message = runtime.lastError.message;
-            console.log('chromeStorageError: ' + message);
-            deferred.reject(message);
-          } else {
-            console.log('Retrieved data for ' + key);
-            deferred.resolve(found)
-          }
-        });
-
-        return deferred.promise;
-      },
-
-      set: function(data) {
-        var deferred = $q.defer();
-
-        storage.set(data, function(){
-          if(chrome.runtime.lastError) {
-            message = runtime.lastError.message;
-            console.log('chromeStorageError: ' + message);
-            deferred.reject(message);
-          } else {
-            console.log('Keys: ' + data.keys());
-            alert('Saved link for ' + data.keys(0));
-            deferred.resolve(true);
-          }
-        });
-
-        return deferred.promise;
-      }
-    };
-  }
-
-
-  function ChromeTabs($q) {
-    return {
-      active: function() {
-        var queryParams = {
-          'lastFocusedWindow': true
-        };
-        var deferred = $q.defer();
-
-        chrome.tabs.query(queryParams, function(tabs){
-          if(tabs) {
-            deferred.resolve(tabs);
-          } else {
-            deferred.reject('Tabs ' + tabs + ' is not valid.');
-          }
-        });
-
-        return deferred.promise;
-      },
-
-      current: function() {
-        var queryParams = {
-          'active': true,
-          'lastFocusedWindow': true
-        };
-        var deferred = $q.defer();
-
-        chrome.tabs.query(queryParams, function(tabs){
-          var tab = tabs[0];
-          if(tab) {
-            console.log(tab.url);
-            deferred.resolve(tab);
-          } else {
-            deferred.reject('Tab ' + tab + ' is not valid.');
-          }
-        });
-
-        return deferred.promise;
-      },
-
-      remove: function(tab_id) {
-        var deferred = $q.defer();
-
-         chrome.tabs.remove(tab_id, function() {
-          deferred.resolve(true);
-        });
-
-        return deferred.promise;
-      },
-
-      update: function(tab_id, options) {
-        chrome.tabs.update(tab_id, options);
-      }
-    };
-  }
 
 
   // Misc Library Services

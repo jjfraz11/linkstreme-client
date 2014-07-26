@@ -1,9 +1,9 @@
 'use strict';
 
-angular.module('LS.chrome', []).
-  factory('Storage2', [ '$q', ChromeStorage2 ]);
+angular.module('LS.chrome').
+  factory('Storage', [ '$q', ChromeStorage ]);
 
-function ChromeStorage2($q) {
+function ChromeStorage($q) {
   var storage;
   // if (type == 'local') {
   if (true) {
