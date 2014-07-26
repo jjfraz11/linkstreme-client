@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('LS.stremeSelect', []).
+angular.module('LS.controllers', []).
   controller('StremeSelectCtrl',
              [ '$scope', '$modal', 'Shared', StremeSelectCtrl ]);
 

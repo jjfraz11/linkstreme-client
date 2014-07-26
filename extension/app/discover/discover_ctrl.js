@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('LS.discover', []).
+angular.module('LS.controllers', []).
   controller('DiscoverCtrl', [ '$scope', 'Shared', DiscoverCtrl ]);
 
 function DiscoverCtrl($scope, Shared){

@@ -1,6 +1,5 @@
 (function(){
-  angular.module('popupApp', ['ui.bootstrap', 'LS.discover', 'LS.collect', 'LS.share',
-                              'LS.stremeSelect' ]).
+  angular.module('popupApp', ['ui.bootstrap', 'LS.controllers' ]).
     factory('DB', [ '$q', IndexedDB ]).
     factory('LinkStreme', [ '$q', 'DB', 'Uri', LinkStreme ]).
     factory('Shared', [ '$rootScope', 'LinkStreme', Shared ]).

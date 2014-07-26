@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module("LS.collect", []).
+angular.module("LS.controllers", []).
   controller('CollectCtrl',
              [ '$scope', 'LinkStreme', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]);
 
