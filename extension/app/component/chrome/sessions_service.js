@@ -1,17 +1,19 @@
 'use strict';
 
-// TODO: Extract dependency on chrome api and use DI
-angular.module('LS.chrome').
-  factory('Sessions', [ ChromeSessions ]);
+(function(){
+  // TODO: Extract dependency on chrome api and use DI
+  angular.module('LS.chrome').
+    factory('Sessions', [ ChromeSessions ]);
 
-function ChromeSessions() {
-  return {
-    restore: function(restoreCallback) {
-      chrome.sessions.restore(restoreCallback);
-    },
+  function ChromeSessions() {
+    return {
+      restore: function(restoreCallback) {
+        chrome.sessions.restore(restoreCallback);
+      },
 
-    restoreLastTab: function() {
-      chrome.sessions.restore();
-    }
-  };
-}
+      restoreLastTab: function() {
+        chrome.sessions.restore();
+      }
+    };
+  }
+})();
