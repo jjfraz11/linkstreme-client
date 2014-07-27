@@ -7,6 +7,24 @@
   angular.module('LS.services', [ 'LS.utilities' ]);
   angular.module('LS.controllers', [ 'LS.chrome', 'LS.services' ]);
 
-  angular.module('popupApp', ['ui.bootstrap', 'LS.chrome', 'LS.controllers',
-                              'LS.utilities', 'LS.services' ]);
+  angular.module('popupApp', [
+    'ngRoute', 'ui.bootstrap', 'LS.controllers', 'LS.services'
+  ]).config(['$routeProvider', function($routeProvider) {
+      $routeProvider.
+        when('/collect', {
+          templateUrl: 'collect/collect.html',
+          controller: 'CollectCtrl'
+        }).
+        when('/discover', {
+          templateUrl: 'discover/discover.html',
+          controller: 'DiscoverCtrl'
+        }).
+        when('/share', {
+          templateUrl: 'share/share.html',
+          controller: 'ShareCtrl'
+        }).
+        otherwise({
+          redirectTo: '/share'
+        });
+  }]);
 })();
