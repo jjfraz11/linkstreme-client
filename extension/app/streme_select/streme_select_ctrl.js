@@ -15,7 +15,7 @@
 
     $scope.open = function(stremeType) {
       var modalInstance = $modal.open({
-        templateUrl: 'streme_select_modal.html',
+        templateUrl: 'streme_select/streme_select_modal.html',
         controller: 'StremeSelectModalCtrl',
         resolve: {
           currentStreme: function() { return $scope.currentStreme; },

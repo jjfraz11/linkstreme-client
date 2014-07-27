@@ -7,69 +7,12 @@
   </head>
 
   <body>
-    <!-- Streme Selector -->
-    <div ng-controller="StremeSelectCtrl">
-      <!-- Streme Select Modal -->
-      <!-- TODO: Move modal template to seperate file -->
-      <script type="text/ng-template" id="streme_select_modal.html">
-        <div class="modal-body">
-          <tabset>
-            <tab heading="{{linkstreme.heading}}" active="linkstreme.active">
-              Selected: <input ng-model="linkstreme.currentStreme['name']"></input>
-              <ul>
-                <li ng-repeat="streme in linkstreme.stremes"
-                    ng-click="linkstreme.select(streme)">{{streme.name}}</li>
-              </ul>
-
-              <!-- TODO: Animate collapse more gracefully on save. -->
-              <div collapse="!linkstreme.showNew">
-                <form novalidate class="simple-form">
-                  Name: <input type="text" ng-model="newStreme.name" />
-                  <button ng-click="linkstreme.add(newStreme)">Save</button>
-                  <button ng-click="linkstreme.showNew = false">Cancel</button>
-                </form>
-              </div>
-
-              <a ng-click="linkstreme.create()">
-                <i class="glyphicon glyphicon-plus"></i>New Streme
-              </a>
-            </tab>
-
-            <tab heading="{{bookmarks.heading}}" active="bookmarks.active">
-            </tab>
-
-            <tab heading="{{history.heading}}" active="history.active">
-            </tab>
-          </tabset>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-primary" ng-click="ok()">OK</button>
-          <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
-        </div>
-      </script>
-
-      <!-- TODO: This input should fit default text properly -->
-      <input type="text" ng-model="currentStreme.name" />
-      <div class="btn-group" dropdown>
-        <button type="button" class="btn btn-primary dropdown-toggle"
-                ng-disabled="disabled">Select</button>
-        <ul class="dropdown-menu" role="menu">
-          <li><a ng-click="open('linkstreme')">Linkstreme ...</a></li>
-          <li><a ng-click="open('bookmarks')">Bookmarks ...</a></li>
-          <li><a ng-click="open('history')">History ...</a></li>
-          <!-- TODO: Add functionality to list recently closed tabs
-               May want to mirror this functionality in collect to allow
-               adding links from closed tabs. May want to merge with History. -->
-          <li><a ng-click="console.log('recent')">Recent ...</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div ng-include src="streme_select/streme_select.html"></div>
+    <div ng-include src="'streme_select/streme_select.html'"></div>
 
     <a class="btn" href="#/discover">Discover</a>
     <a class="btn" href="#/collect">Collect</a>
     <a class="btn" href="#/share">Share</a>
+
     <div ng-view></div>
 
     <!-- Framework level dependencies -->
