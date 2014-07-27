@@ -1,3 +1,8 @@
 <div>
-  Hello Discover
+  Hello Discover<br />
+  <ul>
+    <li ng-repeat="link in stremeLinks">
+      {{ link.streme_id + ' - ' + link.uri_id }}
+    </li>
+  </ul>
 </div>
