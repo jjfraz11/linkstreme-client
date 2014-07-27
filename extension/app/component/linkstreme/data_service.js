@@ -29,6 +29,10 @@
         };
 
         return DB.addTo('links', link);
+      },
+
+      get: function(link_id) {
+        return DB.getFrom('links', link_id);
       }
     };
 
@@ -92,6 +96,7 @@
     return {
       // Link Helpers
       createLink: LS.Link.create,
+      getLink: LS.Link.get,
 
       // Streme Helpers
       createStreme: LS.Streme.create,

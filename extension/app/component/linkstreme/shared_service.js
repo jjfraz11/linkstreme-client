@@ -6,7 +6,8 @@
 
   function Shared($rootScope, Data) {
     var state = {
-      currentStreme: { id: null, links: [] }
+      currentStreme: { id: null, links: [] },
+      stremeLinks: []
     };
 
     var update = function(key, data) {
