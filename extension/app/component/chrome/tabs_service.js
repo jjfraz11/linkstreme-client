@@ -47,7 +47,7 @@
         var deferred = $q.defer();
 
         chrome.tabs.remove(tab_id, function() {
-          deferred.resolve(true);
+          deferred.resolve(tab_id);
         });
 
         return deferred.promise;

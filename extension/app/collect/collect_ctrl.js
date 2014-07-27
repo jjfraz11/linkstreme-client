@@ -20,10 +20,6 @@
       $scope.linkString = JSON.stringify(links);
     });
 
-    // Private methods
-    var pFail = function(reason) { alert('Failed: ' + reason); }
-    var pNotify = function(update) { alert('Notify: ' + update); }
-
     // Set current tab
     var setCurrentTab = function() {
       Tabs.current().
@@ -31,7 +27,7 @@
           if(currentTab) {
             $scope.currentTab = currentTab;
           }
-        }, pFail, pNotify);
+        }, function(message) { alert(message); });
     }
 
     // Set active tabs
@@ -56,20 +52,15 @@
               $scope.activeTabs.push(formatTab(tab));
             });
           }
-        }, pFail, pNotify);
+        }, function(message) { alert(message); });
     }
 
     // Scope methods
-    $scope.closeTab = function(tab, $event) {
+    $scope.closeTab = function(tab_id, $event) {
       // Disable click event for close tab element
       $event.stopPropagation();
-      Tabs.remove(tab.tab_id).
-        then(function(success) {
-          if (success)
-            setActiveTabs();
-          else
-            alert('Tab ' + tab.title + ' not closed.');
-        });
+      Tabs.remove(tab_id).
+        then(function(tab_id) { setActiveTabs(); });
     }
 
     $scope.saveLinks = function() {

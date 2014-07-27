@@ -99,7 +99,7 @@
                 <accordion-group is-open="tab.active">
                   <accordion-heading>
                     <i class="glyphicon glyphicon-remove"
-                       tooltip="Close Tab" ng-click="closeTab(tab,$event);"></i>
+                       tooltip="Close Tab" ng-click="closeTab(tab.tab_id,$event);"></i>
                     <input type="checkbox" ng-model="tab.selected"
                            ng-click="toggleTab(tab, $event);"></input>
                     <span class="link-title">#{{ tab.index }} - {{ tab.title }}</span><br />
