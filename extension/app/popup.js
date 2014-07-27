@@ -10,21 +10,21 @@
   angular.module('popupApp', [
     'ngRoute', 'ui.bootstrap', 'LS.controllers', 'LS.services'
   ]).config(['$routeProvider', function($routeProvider) {
-      $routeProvider.
-        when('/collect', {
-          templateUrl: 'collect/collect.html',
-          controller: 'CollectCtrl'
-        }).
-        when('/discover', {
-          templateUrl: 'discover/discover.html',
-          controller: 'DiscoverCtrl'
-        }).
-        when('/share', {
-          templateUrl: 'share/share.html',
-          controller: 'ShareCtrl'
-        }).
-        otherwise({
-          redirectTo: '/share'
-        });
+    $routeProvider.
+      when('/collect', {
+        templateUrl: 'collect/collect.html',
+        controller: 'CollectCtrl'
+      }).
+      when('/discover', {
+        templateUrl: 'discover/discover.html',
+        controller: 'DiscoverCtrl'
+      }).
+      when('/share', {
+        templateUrl: 'share/share.html',
+        controller: 'ShareCtrl'
+      }).
+      otherwise({
+        redirectTo: '/collect'
+      });
   }]);
 })();

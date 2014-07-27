@@ -6,19 +6,11 @@
                [ '$scope', 'Data', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]);
 
   function CollectCtrl($scope, Data, Shared, Sessions, Tabs){
-    // Event Handlers
     $scope.name = 'CollectCtrl';
 
-    $scope.currentStreme = { links: [] };
-
-    Shared.register($scope, 'currentStreme.update', function(event, streme) {
-      $scope.currentStreme = streme;
-    });
-
-    Shared.register($scope, 'stremeLinks.update', function(event, links) {
-      $scope.stremeLinks = links;
-      $scope.linkString = JSON.stringify(links);
-    });
+    var setLinkString = function(links) {
+      $scope.linkString = JSON.stringify(links || $scope.stremeLinks);
+    };
 
     // Set current tab
     var setCurrentTab = function() {
@@ -55,6 +47,16 @@
         }, function(message) { alert(message); });
     }
 
+    // Event Handlers
+    Shared.register($scope, 'currentStreme.update', function(event, streme) {
+      $scope.currentStreme = streme;
+    });
+    Shared.register($scope, 'stremeLinks.update', function(event, links) {
+      $scope.stremeLinks = links;
+      setLinkString();
+    });
+
+
     // Scope methods
     $scope.closeTab = function(tab_id, $event) {
       // Disable click event for close tab element
@@ -63,6 +65,8 @@
         then(function(tab_id) { setActiveTabs(); });
     }
 
+
+    // UI Controls
     $scope.saveLinks = function() {
       if (!$scope.currentStreme.id) {
         alert('No streme selected.');
@@ -110,6 +114,15 @@
 
     // TODO move these methods into an init function
     // Init code
+    Shared.load('currentStreme', function(streme) {
+      $scope.currentStreme = streme;
+    });
+
+    Shared.load('stremeLinks', function(links) {
+      $scope.stremeLinks = links;
+    });
+
+    setLinkString();
     setCurrentTab();
     setActiveTabs();
   }

@@ -10,5 +10,9 @@
     Shared.register($scope, 'stremeLinks.update', function(event, links) {
       $scope.stremeLinks = links;
     });
+
+    Shared.load('stremeLinks', function(links) {
+      $scope.stremeLinks = links;
+    });
   }
 })();

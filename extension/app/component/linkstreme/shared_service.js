@@ -5,7 +5,9 @@
     factory('Shared', [ '$rootScope', 'Data', Shared ]);
 
   function Shared($rootScope, Data) {
-    var state = {};
+    var state = {
+      currentStreme: { id: null, links: [] }
+    };
 
     var update = function(key, data) {
       var eventName = key + '.update';
@@ -14,6 +16,11 @@
       $rootScope.$broadcast(eventName, state[key]);
 
       alert('Updated ' + key + ' : ' + JSON.stringify(state[key]));
+    };
+
+    var load = function(key, callback) {
+      var data = state[key];
+      callback(data);
     };
 
     var register = function($scope, eventName, callback) {
@@ -33,7 +40,9 @@
     return {
       update: update,
       state: state,
-      register: register
+
+      register: register,
+      load: load
     };
   }
 })();
