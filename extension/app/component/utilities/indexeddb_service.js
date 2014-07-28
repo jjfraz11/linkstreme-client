@@ -85,7 +85,80 @@
       } else { alert( 'Unknown store: ' + storeName); }
     }
 
+    function Store(storeName) {
+      this.store = getStore(storeName);
+
+      this.objectName = function() {
+        alert('This method should be overridden by subclasses.');
+      };
+
+      this.setupNew = function() {
+        alert('This method should be overridden by subclasses.');
+      };
+    }
+
+    Store.prototype.put = function() {
+      var deferred = $q.defer();
+      var object = this.setupNew(arguments);
+
+      this.store.put(object, function(keyPath) {
+        var objectName = this.objectName(object);
+        console.log('Added ' + objectName + ' to ' +
+                    this.store.storeName + ' : ' + keyPath);
+        deferred.resolve(keyPath);
+      }, function() {
+        var objectInfo = JSON.stringify(object);
+        deferred.reject('Could not add ' + objectInfo +
+                        ' to ' + this.store.storeName);
+      });
+
+      return deferred.promise;
+    };
+
+    Store.prototype.get = function(keyPath) {
+      var deferred = $q.defer();
+
+      this.store.get(keyPath, function(object) {
+        deferred.resolve(object);
+      }, function() {
+        deferred.reject('No object found in ' + this.store.storeName +
+                        'with keyPath: ' + keyPath);
+      });
+
+      return deferred.promise;
+    };
+
+    Store.prototype.getAll = function() {
+      var deferred = $q.defer();
+
+      this.store.getAll(function(objects) {
+        deferred.resolve(objects);
+      }, function() {
+        deferred.reject('Could not retrive objects from ' + this.store.storeName);
+      });
+
+      return deferred.promise;
+    };
+
+    Store.prototype.query = function(queryOptions) {
+      var deferred = $q.defer();
+
+      if(queryOptions.keyRange) {
+        var keyRangeOptions = queryOptions.keyRange;
+        queryOptions.keyRange = this.store.makeKeyRange(keyRangeOptions);
+
+        this.store.query( function(objects) { deferred.resolve(objects); },
+                          queryOptions );
+      } else {
+        deferred.reject('Must set a keyRange in queryOptions.');
+      }
+
+      return deferred.promise;
+    };
+
     return {
+      Store: Store,
+
       addTo: function(storeName, object) {
         var deferred = $q.defer();
         var store = getStore(storeName);

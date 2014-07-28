@@ -6,14 +6,50 @@
 
   // Helper Services
   function Data($q, DB, Uri) {
-    var getStremeUriKey = function(streme, uri) {
-      return 'streme:' + streme.id + '-uri:' + uri.id
-    };
+
+    function LinkStore() {
+      DB.Store.call(this, 'links');
+
+      var getStremeUriKey = function(streme, uri) {
+        return 'streme:' + streme.id + '-uri:' + uri.id
+      };
+
+      this.objectName = function(link) {
+        return 'Link Key: ' + link.streme_uri_key;
+      };
+
+      this.setupNew = function(streme, uri) {
+        if(!streme.id) {
+          alert('No ID for streme: ' + JSON.stringify(streme));
+        }
+
+        if(!uri.id) {
+          alert('No ID for URI: ' + JSON.stringify(uri));
+        }
+
+        var link = {
+          streme_id: streme.id,
+          uri_id: uri.id,
+          url: uri.url,
+          streme_uri_key: getStremeUriKey(streme, uri),
+        };
+
+        return link
+      };
+    }
+    LinkStore.prototype = Object.create(DB.Store.prototype);
+    LinkStore.prototype.constructor = LinkStore;
+    LinkStore.prototype.type = function() {
+    }
 
     var LS = {};
 
     LS.Link = {
       create: function(streme, uri) {
+        var getStremeUriKey = function(streme, uri) {
+          return 'streme:' + streme.id + '-uri:' + uri.id
+        };
+
         if(!streme.id) {
           alert('No ID for streme: ' + JSON.stringify(streme));
         }
