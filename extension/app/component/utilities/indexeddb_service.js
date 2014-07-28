@@ -129,6 +129,11 @@
       return deferred.promise;
     };
 
+    Store.prototype.create = function(objectData) {
+      return this.put(objectData).
+        then(this.get);
+    };
+
     Store.prototype.getAll = function() {
       var deferred = $q.defer();
 

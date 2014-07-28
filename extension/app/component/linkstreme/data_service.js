@@ -40,51 +40,62 @@
     LinkStore.prototype = Object.create(DB.Store.prototype);
     LinkStore.prototype.constructor = LinkStore;
 
+    // Should return a list of Uris associated with given links
+    LinkStore.prototype.getUris = function(link_ids) {
+    };
+
+
     function UriStore() {
       DB.Store.call(this, 'uris');
 
-      this.objectName = function(link) {
+      this.objectName = function(uri) {
+        return 'Uri Key: ' + uri.url;
       };
 
-      this.setupNew = function(linkData) {
+      this.setupNew = function(uriData) {
+        var normUrl = Uri.normalize(uriData.url);
+        var uri = Uri.parse(normUrl);
+        return uri;
       };
     }
     UriStore.prototype = Object.create(DB.Store.prototype);
     UriStore.prototype.constructor = UriStore;
 
-    var LS = {};
+    UriStore.prototype.findByUrl = function(url) {
+      // Get normalized url
+      var normUrl = Uri.normalize(url);
+      var queryOptions = {
+        index: 'url',
+        keyRange: {only: normUrl}
+      };
 
-    LS.Link = {
-      create: function(streme, uri) {
-        var getStremeUriKey = function(streme, uri) {
-          return 'streme:' + streme.id + '-uri:' + uri.id
-        };
-
-        if(!streme.id) {
-          alert('No ID for streme: ' + JSON.stringify(streme));
-        }
-
-        if(!uri.id) {
-          alert('No ID for URI: ' + JSON.stringify(uri));
-        }
-
-        var link = {
-          streme_id: streme.id,
-          uri_id: uri.id,
-          url: uri.url,
-          streme_uri_key: getStremeUriKey(streme, uri),
-        };
-
-        return DB.addTo('links', link);
-      },
-
-      get: function(link_id) {
-        return DB.getFrom('links', link_id);
-      },
-
-      getUri: function(link_ids) {}
+      return this.query(queryOptions);
     };
 
+    UriStore.prototype.findOrCreateByUrl = function(url) {
+      var self = this;
+      var createIfMissing = function(foundUris) {
+        var deferred = $q.defer();
+
+        // Create URI if none exists
+        if (foundUris.length === 0) {
+          self.create({ url: url }).
+            then(function(uri) {
+              alert('Added: ' + JSON.stringify(uri));
+              deferred.resolve(uri);
+            });
+        } else {
+          deferred.resolve(foundUris[0]);
+        }
+
+        return deferred.promise;
+      };
+
+      return this.findByUrl(url).
+        then(createIfMissing);
+    }
+
+    var LS = {};
 
     LS.Streme = {
       create: function(streme) {
@@ -120,72 +131,14 @@
       }
     };
 
-    // URI Helpers
-    LS.Uri = {
-      create: function(url) {
-        var uri = Uri.parse(url);
-        return DB.addTo('uris', uri);
-      },
-
-      find: function(url) {
-        // Get normalized url
-        var normUrl = Uri.normalize(url);
-
-        return DB.queryFrom('uris', {
-          index: 'url',
-          keyRange: {only: normUrl}
-        });
-      },
-
-      get: function(uri_id) {
-        return DB.getFrom('uris', uri_id);
-      }
-    };
-
-    var alertMessage = function(message) { alert(message); };
-
     return {
       Links: new LinkStore,
       Uris: new UriStore,
-
-      // Link Helpers
-      createLink: LS.Link.create,
-      deleteLink: LS.Link.del,
-      getLink: LS.Link.get,
 
       // Streme Helpers
       createStreme: LS.Streme.create,
       getAllStremes: LS.Streme.getAll,
       getStremeLinks: LS.Streme.getLinks,
-
-      // URI Helpers
-      createUri: LS.Uri.create,
-      findUri: LS.Uri.find,
-      getUri: LS.Uri.get,
-
-      findOrCreateUri: function(url) {
-        var createIfMissing = function(foundUris) {
-          var deferred = $q.defer();
-
-          // Create URI if none exists
-          if (foundUris.length === 0) {
-            LS.Uri.create(url).
-              then(LS.Uri.get).
-              then(function(uri) {
-                alert('Added: ' + JSON.stringify(uri));
-                deferred.resolve(uri);
-              });
-          } else {
-            deferred.resolve(foundUris[0]);
-          }
-
-          return deferred.promise;
-        };
-
-        return LS.Uri.find(url).
-          then(createIfMissing);
-      }
-
     };
   }
 })();

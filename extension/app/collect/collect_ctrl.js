@@ -94,7 +94,7 @@
         if(tab.selected) {
           console.log('Selected: ' + tab.title);
 
-          Data.findOrCreateUri(tab.url).
+          Data.Uris.findOrCreateByUrl(tab.url).
             then(createLink);
         }
       });
