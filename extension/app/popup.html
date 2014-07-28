@@ -6,13 +6,9 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
 
-  <body>
+  <body ng-cloak>
+    <div ng-include src="'nav.html'"></div>
     <div ng-include src="'streme_select/streme_select.html'"></div>
-
-    <a class="btn" href="#/discover">Discover</a>
-    <a class="btn" href="#/collect">Collect</a>
-    <a class="btn" href="#/share">Share</a>
-
     <div ng-view></div>
 
     <!-- Framework level dependencies -->
@@ -42,6 +38,5 @@
     <script type="text/javascript" src="share/share_ctrl.js"></script>
     <script type="text/javascript" src="streme_select/streme_select_ctrl.js"></script>
     <script type="text/javascript" src="streme_select/streme_select_modal_ctrl.js"></script>
-    
   </body>
 </html>

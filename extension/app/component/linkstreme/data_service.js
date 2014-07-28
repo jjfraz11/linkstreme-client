@@ -25,6 +25,7 @@
         var link = {
           streme_id: streme.id,
           uri_id: uri.id,
+          url: uri.url,
           streme_uri_key: getStremeUriKey(streme, uri),
         };
 
@@ -33,7 +34,9 @@
 
       get: function(link_id) {
         return DB.getFrom('links', link_id);
-      }
+      },
+
+      getUri: function(link_ids) {}
     };
 
 
@@ -93,9 +96,12 @@
       }
     };
 
+    var alertMessage = function(message) { alert(message); };
+
     return {
       // Link Helpers
       createLink: LS.Link.create,
+      deleteLink: LS.Link.del,
       getLink: LS.Link.get,
 
       // Streme Helpers
