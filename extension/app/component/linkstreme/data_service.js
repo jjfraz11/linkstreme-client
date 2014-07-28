@@ -18,20 +18,20 @@
         return 'Link Key: ' + link.streme_uri_key;
       };
 
-      this.setupNew = function(streme, uri) {
-        if(!streme.id) {
+      this.setupNew = function(linkData) {
+        if(!linkData.streme.id) {
           alert('No ID for streme: ' + JSON.stringify(streme));
         }
 
-        if(!uri.id) {
+        if(!linkData.uri.id) {
           alert('No ID for URI: ' + JSON.stringify(uri));
         }
 
         var link = {
-          streme_id: streme.id,
-          uri_id: uri.id,
-          url: uri.url,
-          streme_uri_key: getStremeUriKey(streme, uri),
+          streme_id: linkData.streme.id,
+          uri_id:    linkData.uri.id,
+          url:       linkData.uri.url,
+          streme_uri_key: getStremeUriKey(linkData.streme, linkData.uri),
         };
 
         return link
@@ -39,8 +39,18 @@
     }
     LinkStore.prototype = Object.create(DB.Store.prototype);
     LinkStore.prototype.constructor = LinkStore;
-    LinkStore.prototype.type = function() {
+
+    function UriStore() {
+      DB.Store.call(this, 'uris');
+
+      this.objectName = function(link) {
+      };
+
+      this.setupNew = function(linkData) {
+      };
     }
+    UriStore.prototype = Object.create(DB.Store.prototype);
+    UriStore.prototype.constructor = UriStore;
 
     var LS = {};
 
@@ -135,6 +145,9 @@
     var alertMessage = function(message) { alert(message); };
 
     return {
+      Links: new LinkStore,
+      Uris: new UriStore,
+
       // Link Helpers
       createLink: LS.Link.create,
       deleteLink: LS.Link.del,

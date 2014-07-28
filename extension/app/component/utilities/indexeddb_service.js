@@ -97,19 +97,20 @@
       };
     }
 
-    Store.prototype.put = function() {
+    Store.prototype.put = function(objectData) {
       var deferred = $q.defer();
-      var object = this.setupNew(arguments);
+      var object = this.setupNew(objectData);
+      var self = this;
 
       this.store.put(object, function(keyPath) {
-        var objectName = this.objectName(object);
+        var objectName = self.objectName(object);
         console.log('Added ' + objectName + ' to ' +
-                    this.store.storeName + ' : ' + keyPath);
+                    self.store.storeName + ' : ' + keyPath);
         deferred.resolve(keyPath);
       }, function() {
         var objectInfo = JSON.stringify(object);
         deferred.reject('Could not add ' + objectInfo +
-                        ' to ' + this.store.storeName);
+                        ' to ' + self.store.storeName);
       });
 
       return deferred.promise;

@@ -76,11 +76,12 @@
       // This function takes a uri and creates a link in currrentStreme
       // It returns a promise that will look up the link_id.
       var createLink = function(uri) {
-        return Data.createLink($scope.currentStreme, uri).
+        var linkData = { streme: $scope.currentStreme, uri: uri };
+        return Data.Links.put(linkData).
           then(function(link_id) {
             // TODO: Add link_id to links for currentStreme
             // Then update the shared currentStreme
-            $scope.currentStreme.links.push(link_id);
+            // $scope.currentStreme.links.push(link_id);
 
             console.log('I should do something with link #' + link_id);
           }, function(message) {
@@ -113,7 +114,6 @@
     }
 
     // TODO move these methods into an init function
-    // Init code
     Shared.load('currentStreme', function(streme) {
       $scope.currentStreme = streme;
     });
