@@ -1,0 +1,21 @@
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+html, body {
+    width:  400px;
+    height: 800px;
+}
+
+.link-title {
+    font-weight: 700;
+    font-size: 0.9em;
+}
+
+.link-url {
+    font-weight: 300;
+    font-size: 0.7em;
+}
+
+.glyphicon-remove {
+    color: red;
+    float: right;
+}

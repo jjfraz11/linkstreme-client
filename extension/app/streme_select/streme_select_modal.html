@@ -1,0 +1,34 @@
+<div class="modal-body">
+  <tabset>
+    <tab heading="{{linkstreme.heading}}" active="linkstreme.active">
+      Selected: <input ng-model="linkstreme.currentStreme['name']"></input>
+      <ul>
+        <li ng-repeat="streme in linkstreme.stremes"
+            ng-click="linkstreme.select(streme)">{{streme.name}}</li>
+      </ul>
+
+      <!-- TODO: Animate collapse more gracefully on save. -->
+      <div collapse="!linkstreme.showNew">
+        <form novalidate class="simple-form">
+          Name: <input type="text" ng-model="newStreme.name" />
+          <button ng-click="linkstreme.add(newStreme)">Save</button>
+          <button ng-click="linkstreme.showNew = false">Cancel</button>
+        </form>
+      </div>
+
+      <a ng-click="linkstreme.create()">
+        <i class="glyphicon glyphicon-plus"></i>New Streme
+      </a>
+    </tab>
+
+    <tab heading="{{bookmarks.heading}}" active="bookmarks.active">
+    </tab>
+
+    <tab heading="{{history.heading}}" active="history.active">
+    </tab>
+  </tabset>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" ng-click="ok()">OK</button>
+  <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+</div>
