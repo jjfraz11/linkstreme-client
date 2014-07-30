@@ -7,10 +7,14 @@
                  'Sessions', 'Tabs', CollectCtrl ]);
 
   function CollectCtrl($scope, Data, Shared, Sessions, Tabs){
+    var currentStreme;
+    var stremeLinks;
+
     $scope.name = 'CollectCtrl';
 
-    var setLinkString = function(links) {
-      $scope.linkString = JSON.stringify(links || $scope.stremeLinks);
+    var setLinkString = function() {
+      $scope.linkString = JSON.stringify(stremeLinks);
+      // alert("LinkString: " + $scope.linkString);
     };
 
     // Set current tab
@@ -38,11 +42,12 @@
 
     // Event Handlers
     Shared.register($scope, 'currentStreme.update', function(event, streme) {
-      $scope.currentStreme = streme;
+      currentStreme = streme;
     });
     Shared.register($scope, 'stremeLinks.update', function(event, links) {
-      $scope.stremeLinks = links;
+      stremeLinks = links;
       setLinkString();
+      setActiveTabs();
     });
 
 
@@ -62,12 +67,9 @@
         if(tab.selected) {
           console.log('Selected: ' + tab.title);
 
-          Data.saveLink(Shared.state.currentStreme, tab.url).
+          Data.saveLink(currentStreme, tab.url).
             then(function(link) {
-              // TODO: Add link_id to links for currentStreme
-              // Then update the shared currentStreme
-              Shared.state.stremeLinks.push(link);
-              alert('Link #' + link.id + ' successfully added.');
+              Shared.updateStremeLinks();
             }, function(message) { alert(message); });
         }
       });
@@ -84,15 +86,19 @@
     $scope.undoCloseTab = function() {
       Sessions.restoreLastTab();
       setActiveTabs();
-    }
+    };
+
+    $scope.resetDatabase = function() {
+      Data.resetDatabase();
+    };
 
     // TODO move these methods into an init function
     Shared.load('currentStreme', function(streme) {
-      $scope.currentStreme = streme;
+      currentStreme = streme;
     });
 
     Shared.load('stremeLinks', function(links) {
-      $scope.stremeLinks = links;
+      stremeLinks = links;
     });
 
     setLinkString();

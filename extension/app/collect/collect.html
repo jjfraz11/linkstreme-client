@@ -4,6 +4,8 @@
           ng-click="saveLinks()">Save Links</button>
   <button type="button" class="btn btn-default"
           ng-click="undoCloseTab()">Undo Tab Close</button>
+  <button type="button" class="btn btn-default"
+          ng-click="resetDatabase()">Reset Database</button>
 
   <br /><span ng-repeat="link_id in currentStreme.links">
     {{ link_id + ' : ' }}

@@ -35,9 +35,15 @@
       return deferred.promise;
     };
 
+    var resetDatabase = function(storeName) {
+      LinkStore.deleteDatabase();
+      StremeStore.deleteDatabase();
+      UriStore.deleteDatabase();
+    };
 
     return {
-      saveLink: saveLink
+      saveLink: saveLink,
+      resetDatabase: resetDatabase
     };
   }
 })();
