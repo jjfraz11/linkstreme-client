@@ -3,7 +3,8 @@
 (function(){
   angular.module('LS.controllers').
     controller('CollectCtrl',
-               [ '$scope', 'Data', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]);
+               [ '$scope', 'Data', 'Shared',
+                 'Sessions', 'Tabs', CollectCtrl ]);
 
   function CollectCtrl($scope, Data, Shared, Sessions, Tabs){
     $scope.name = 'CollectCtrl';
@@ -24,24 +25,12 @@
 
     // Set active tabs
     var setActiveTabs = function() {
-      // Return standard tab object
-      var formatTab = function(tab) {
-        return {
-          tab_id: tab.id,
-          index: tab.index + 1,
-          title: tab.title,
-          url: tab.url,
-          active: tab.highlighted,
-          selected: false
-        };
-      };
-
       Tabs.active().
         then(function(activeTabs) {
           if(activeTabs) {
             $scope.activeTabs = [];
             angular.forEach(activeTabs, function(tab) {
-              $scope.activeTabs.push(formatTab(tab));
+              $scope.activeTabs.push(Tabs.newTab(tab));
             });
           }
         }, function(message) { alert(message); });
@@ -68,34 +57,18 @@
 
     // UI Controls
     $scope.saveLinks = function() {
-      if (!$scope.currentStreme.id) {
-        alert('No streme selected.');
-        return;
-      }
-
-      // This function takes a uri and creates a link in currrentStreme
-      // It returns a promise that will look up the link_id.
-      var createLink = function(uri) {
-        var linkData = { streme: $scope.currentStreme, uri: uri };
-        return Data.Links.put(linkData).
-          then(function(link_id) {
-            // TODO: Add link_id to links for currentStreme
-            // Then update the shared currentStreme
-            // $scope.currentStreme.links.push(link_id);
-
-            console.log('I should do something with link #' + link_id);
-          }, function(message) {
-            alert(message);
-          });
-      };
-
       // TODO: need to add check for at least one selected tab.
       angular.forEach($scope.activeTabs, function(tab) {
         if(tab.selected) {
           console.log('Selected: ' + tab.title);
 
-          Data.Uris.findOrCreateByUrl(tab.url).
-            then(createLink);
+          Data.saveLink(Shared.state.currentStreme, tab.url).
+            then(function(link) {
+              // TODO: Add link_id to links for currentStreme
+              // Then update the shared currentStreme
+              Shared.state.stremeLinks.push(link);
+              alert('Link #' + link.id + ' successfully added.');
+            }, function(message) { alert(message); });
         }
       });
     }

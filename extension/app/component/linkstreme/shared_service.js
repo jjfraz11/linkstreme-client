@@ -2,9 +2,9 @@
 
 (function(){
   angular.module('LS.services').
-    factory('Shared', [ '$rootScope', 'Data', Shared ]);
+    factory('Shared', [ '$rootScope', 'LinkStore', Shared ]);
 
-  function Shared($rootScope, Data) {
+  function Shared($rootScope, LinkStore) {
     var state = {
       currentStreme: { id: null, links: [] },
       stremeLinks: []
@@ -32,7 +32,7 @@
 
     // Register callback to update links when currentStreme updated.
     register($rootScope, 'currentStreme.update', function(event, streme) {
-      Data.Links.findByStremeId(streme.id).
+      LinkStore.findByStremeId(streme.id).
         then(function(foundLinks) {
           update('stremeLinks', foundLinks);
         });
@@ -43,7 +43,8 @@
       state: state,
 
       register: register,
-      load: load
+      load: load,
+
     };
   }
 })();

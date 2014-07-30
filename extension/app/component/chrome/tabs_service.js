@@ -55,6 +55,18 @@
 
       update: function(tab_id, options) {
         chrome.tabs.update(tab_id, options);
+      },
+
+      // Return standard tab object
+      newTab: function(tabData) {
+        return {
+          tab_id:   tabData.id,
+          index:    tabData.index + 1,
+          title:    tabData.title,
+          url:      tabData.url,
+          active:   tabData.highlighted,
+          selected: false
+        };
       }
     };
   }
