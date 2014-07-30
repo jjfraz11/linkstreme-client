@@ -20,11 +20,11 @@
 
       this.setupNew = function(linkData) {
         if(!linkData.streme.id) {
-          alert('No ID for streme: ' + JSON.stringify(streme));
+          alert('No ID for streme: ' + JSON.stringify(linkData.streme));
         }
 
         if(!linkData.uri.id) {
-          alert('No ID for URI: ' + JSON.stringify(uri));
+          alert('No ID for URI: ' + JSON.stringify(linkData.uri));
         }
 
         var link = {
@@ -33,16 +33,54 @@
           url:       linkData.uri.url,
           streme_uri_key: getStremeUriKey(linkData.streme, linkData.uri),
         };
-
-        return link
+        return link;
       };
     }
     LinkStore.prototype = Object.create(DB.Store.prototype);
     LinkStore.prototype.constructor = LinkStore;
 
     // Should return a list of Uris associated with given links
-    LinkStore.prototype.getUris = function(link_ids) {
+    LinkStore.prototype.findByStremeId = function(stremeId) {
+      if (!stremeId) {
+        alert('No streme id given: ' + JSON.stringify(stremeId));
+      }
+      var deferred = $q.defer();
+      var queryOptions = {
+        index: 'streme_id',
+        keyRange: { only: stremeId }
+      };
+
+      this.query(queryOptions).
+        then(function(foundLinks) {
+          deferred.resolve(foundLinks);
+        }, function(message) {
+          deferred.reject(message);
+        });
+
+      return deferred.promise;
     };
+
+    function StremeStore() {
+      DB.Store.call(this, 'stremes');
+
+      this.objectName = function(streme) {
+        return 'Streme Key: ' + streme.name;
+      };
+
+      this.setupNew = function(stremeData) {
+        if(!stremeData.name) {
+          alert('No name found for streme: ' + JSON.stringify(stremeData));
+        }
+
+        var streme = {
+          name: stremeData.name,
+          links: stremeData.links || []
+        };
+        return streme;
+      };
+    }
+    StremeStore.prototype = Object.create(DB.Store.prototype);
+    StremeStore.prototype.constructor = StremeStore;
 
 
     function UriStore() {
@@ -53,6 +91,10 @@
       };
 
       this.setupNew = function(uriData) {
+        if(!uriData.url) {
+          alert('No url found in uriData: ' + JSON.stringify(uriData));
+        }
+
         var normUrl = Uri.normalize(uriData.url);
         var uri = Uri.parse(normUrl);
         return uri;
@@ -62,6 +104,7 @@
     UriStore.prototype.constructor = UriStore;
 
     UriStore.prototype.findByUrl = function(url) {
+      var deferred = $q.defer();
       // Get normalized url
       var normUrl = Uri.normalize(url);
       var queryOptions = {
@@ -69,76 +112,43 @@
         keyRange: {only: normUrl}
       };
 
-      return this.query(queryOptions);
+      this.query(queryOptions).
+        then(function(foundUris){
+          if (foundUris.length === 0) {
+            deferred.reject('No uris found.');
+          } else {
+            deferred.resolve(foundUris[0]);
+          }
+        });
+
+      return deferred.promise;
     };
 
     UriStore.prototype.findOrCreateByUrl = function(url) {
+      var deferred = $q.defer();
       var self = this;
-      var createIfMissing = function(foundUris) {
-        var deferred = $q.defer();
 
-        // Create URI if none exists
-        if (foundUris.length === 0) {
-          self.create({ url: url }).
+      this.findByUrl(url).
+        then(function(uri) {
+          deferred.resolve(foundUri);
+        },function(message) {
+          console.log(message);
+          self.put({url: url}).
+            then(function(uriId) {
+              return self.get(uriId)
+            }).
             then(function(uri) {
-              alert('Added: ' + JSON.stringify(uri));
               deferred.resolve(uri);
             });
-        } else {
-          deferred.resolve(foundUris[0]);
-        }
+        });
 
-        return deferred.promise;
-      };
-
-      return this.findByUrl(url).
-        then(createIfMissing);
-    }
-
-    var LS = {};
-
-    LS.Streme = {
-      create: function(streme) {
-        if(!streme.name) {
-          alert('No name found for streme: ' + JSON.stringify(streme));
-        }
-        streme.links = streme.links || [];
-
-        return DB.addTo('stremes', streme);
-      },
-
-      getAll: function() {
-        return DB.getAllFrom('stremes');
-      },
-
-      getLinks: function(streme) {
-        var deferred = $q.defer();
-
-        if (streme.hasOwnProperty('id')) {
-          DB.queryFrom('links', {
-            index: 'streme_id',
-            keyRange: { only: streme.id }
-          }).then(function(foundLinks) {
-            deferred.resolve(foundLinks);
-          }, function(message) {
-            deferred.reject(message);
-          });
-        } else {
-          deferred.reject('No ID for streme: ' + JSON.stringify(streme));
-        }
-
-        return deferred.promise;
-      }
+      return deferred.promise;
     };
 
     return {
-      Links: new LinkStore,
-      Uris: new UriStore,
-
-      // Streme Helpers
-      createStreme: LS.Streme.create,
-      getAllStremes: LS.Streme.getAll,
-      getStremeLinks: LS.Streme.getLinks,
+      Links:   new LinkStore,
+      Stremes: new StremeStore,
+      Uris:    new UriStore,
     };
   }
 })();

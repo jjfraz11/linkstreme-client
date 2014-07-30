@@ -32,7 +32,7 @@
 
     // Register callback to update links when currentStreme updated.
     register($rootScope, 'currentStreme.update', function(event, streme) {
-      Data.getStremeLinks(streme).
+      Data.Links.findByStremeId(streme.id).
         then(function(foundLinks) {
           update('stremeLinks', foundLinks);
         });

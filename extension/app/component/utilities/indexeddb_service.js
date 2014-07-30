@@ -130,8 +130,9 @@
     };
 
     Store.prototype.create = function(objectData) {
+      var self = this;
       return this.put(objectData).
-        then(this.get);
+        then(self.get);
     };
 
     Store.prototype.getAll = function() {

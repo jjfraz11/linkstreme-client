@@ -32,7 +32,7 @@
       stremes: [],
 
       add: function(streme) {
-        Data.createStreme(streme).
+        Data.Stremes.put(streme).
           then(function(streme_id) {
             $scope.linkstreme.showNew = false;
             $scope.linkstreme.updateStremes();
@@ -55,7 +55,7 @@
       },
 
       updateStremes: function() {
-        Data.getAllStremes().
+        Data.Stremes.getAll().
           then(function(stremes) {
             $scope.linkstreme.stremes = stremes;
           }, function(error) {
