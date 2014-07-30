@@ -5,6 +5,19 @@
     factory('UriStore', [ '$q', 'DB', 'Uri', BuildUriStore ]);
 
   function BuildUriStore($q, DB, Uri) {
+    DB.buildStore('uris', {
+      dbVersion: 2,
+      keyPath: 'id',
+      autoIncrement: true,
+
+      indexes: [ {
+        name: 'url',
+        keyPath: 'url',
+        unique: true,
+        multientry: false
+      } ]
+    });
+
     function UriStore() {
       DB.Store.call(this, 'uris');
 

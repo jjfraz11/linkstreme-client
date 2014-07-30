@@ -2,12 +2,13 @@
 
 (function(){
   angular.module('LS.services').
-    factory('Shared', [ '$rootScope', 'LinkStore', Shared ]);
+    factory('Shared', [ '$rootScope', 'LinkStore', 'UriStore', Shared ]);
 
-  function Shared($rootScope, LinkStore) {
+  function Shared($rootScope, LinkStore, UriStore) {
     var state = {
       currentStreme: { id: null, links: [] },
-      stremeLinks: []
+      stremeLinks: [],
+      uris: {}
     };
 
     var update = function(key, data) {
@@ -15,8 +16,6 @@
 
       state[key] = data;
       $rootScope.$broadcast(eventName, state[key]);
-
-      alert('Updated ' + key + ' : ' + JSON.stringify(state[key]));
     };
 
     var load = function(key, callback) {
@@ -30,20 +29,30 @@
       });
     };
 
-    // Register callback to update links when currentStreme updated.
-    register($rootScope, 'currentStreme.update', function(event, streme) {
-      LinkStore.findByStremeId(streme.id).
+    var updateStremeLinks = function(streme_id) {
+      LinkStore.findByStremeId(streme_id).
         then(function(foundLinks) {
           update('stremeLinks', foundLinks);
         });
+    };
+
+    // Register callback to update links when currentStreme updated.
+    register($rootScope, 'currentStreme.update', function(event, streme) {
+      updateStremeLinks(streme.id);
     });
 
     return {
+      currentStreme: state.currentStreme,
+      stremeLinks: state.stremeLinks,
+
       update: update,
-      state: state,
 
       register: register,
       load: load,
+
+      updateStremeLinks: function() {
+        updateStremeLinks(state.currentStreme.id)
+      }
 
     };
   }

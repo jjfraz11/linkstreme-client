@@ -5,6 +5,31 @@
     factory('LinkStore', [ '$q', 'DB', BuildLinkStore ]);
 
   function BuildLinkStore($q, DB) {
+    // Data stores should be created in the LinkStreme service
+    DB.buildStore('links', {
+      dbVersion: 3,
+      keyPath: 'id',
+      autoIncrement: true,
+
+      indexes: [ {
+        name: 'streme_id',
+        keyPath: 'streme_id',
+        unique: false,
+        multientry: false
+      }, {
+        name: 'uri_id',
+        keyPath: 'uri_id',
+        unique: false,
+        multientry: false
+      }, {
+        name: 'streme_uri_key',
+        keyPath: [ 'streme_id', 'uri_id' ],
+        unique: true,
+        multientry: false
+      }]
+    });
+
+
     function LinkStore() {
       DB.Store.call(this, 'links');
 

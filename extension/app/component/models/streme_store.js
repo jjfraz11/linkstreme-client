@@ -5,6 +5,19 @@
     factory('StremeStore', [ '$q', 'DB', BuildStremeStore ]);
 
   function BuildStremeStore($q, DB) {
+    DB.buildStore('stremes', {
+      dbVersion: 4,
+      keyPath: 'id',
+      autoIncrement: true,
+
+      indexes: [ {
+        name: 'name',
+        keyPath: 'name',
+        unique: true,
+        multientry: false
+      } ]
+    });
+
     function StremeStore() {
       DB.Store.call(this, 'stremes');
 
