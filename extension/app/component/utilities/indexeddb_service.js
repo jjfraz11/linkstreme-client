@@ -86,9 +86,27 @@
         then(function(object) {
           deferred.resolve(object);
         }).
-        catch(function() {
-          deferred.reject('No object found in ' + self.store.storeName +
-                          'with keyPath: ' + keyPath);
+        catch(function(message) {
+          deferred.reject(message);
+        });
+
+      return deferred.promise;
+    };
+
+    StoreBase.prototype.delete = function(keyPath) {
+      var deferred = $q.defer();
+      var self = this;
+
+      if(!keyPath) { alert('Missing keypath: ' + JSON.stringify(keyPath)); }
+
+      this.store.delete(keyPath).
+        then(function() {
+          console.log('Deleted Item #' + keyPath + ' from ' +
+                      self.storeName);
+          deferred.resolve();
+        }).
+        catch(function(message) {
+          deferred.reject(message);
         });
 
       return deferred.promise;
