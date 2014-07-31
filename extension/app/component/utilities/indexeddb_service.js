@@ -43,22 +43,8 @@
 
   function BuildStoreBase($q, DB) {
     function StoreBase(storeName) {
-      var stores = {}
-
-      var getStore = function(storeName) {
-        if ( storeName == 'links' ) {
-          return DB.db.links;
-          //return stores['links']
-        } else if ( storeName == 'stremes' ) {
-          return DB.db.stremes;
-          // return stores['stremes'];
-        } else if ( storeName == 'uris' ) {
-          return DB.db.uris;
-          // return stores['uris'];
-        } else { alert( 'Unknown store: ' + storeName); }
-      }
       this.storeName = storeName;
-      this.store = getStore(storeName);
+      this.store = DB.db[storeName];
 
       this.objectName = function() {
         alert('This method should be overridden by subclasses.');
