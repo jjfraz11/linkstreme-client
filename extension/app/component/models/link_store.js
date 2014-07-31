@@ -26,9 +26,10 @@
         }
 
         var link = {
-          streme_id: linkData.streme.id,
-          uri_id:    linkData.uri.id,
-          url:       linkData.uri.url,
+          streme_id:   linkData.streme.id,
+          streme_name: linkData.streme.name,
+          uri_id:      linkData.uri.id,
+          url:         linkData.uri.url,
           streme_uri_key: getStremeUriKey(linkData.streme, linkData.uri),
         };
         return link;

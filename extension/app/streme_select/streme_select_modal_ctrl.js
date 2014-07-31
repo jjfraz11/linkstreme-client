@@ -3,11 +3,10 @@
 (function(){
   angular.module('LS.controllers').
     controller('StremeSelectModalCtrl',
-               [ '$scope', '$modalInstance', 'StremeStore', 'currentStreme', 'stremeType',
+               [ '$scope', '$modalInstance', 'Data', 'currentStreme', 'stremeType',
                  StremeSelectModalCtrl ]);
 
-  function StremeSelectModalCtrl($scope, $modalInstance, StremeStore,
-                                 currentStreme, stremeType) {
+  function StremeSelectModalCtrl($scope, $modalInstance, Data, currentStreme, stremeType) {
     // TODO: Fix streme selection to work in different contexts
     $scope.selected = currentStreme;
 
@@ -32,8 +31,8 @@
       showNew: false,
       stremes: [],
 
-      add: function(streme) {
-        StremeStore.put(streme).
+      add: function(stremeData) {
+        Data.saveStreme(stremeData).
           then(function(streme_id) {
             $scope.linkstreme.showNew = false;
             $scope.linkstreme.updateStremes();
@@ -44,8 +43,8 @@
       },
 
       create: function() {
-        $scope.linkstreme.showNew = true;
         $scope.newStreme = { links: [] };
+        $scope.linkstreme.showNew = true;
       },
 
       select: function(streme) {
@@ -56,7 +55,7 @@
       },
 
       updateStremes: function() {
-        StremeStore.getAll().
+        Data.loadStremes().
           then(function(stremes) {
             $scope.linkstreme.stremes = stremes;
           }, function(error) {

@@ -6,7 +6,7 @@
   angular.module('LS.utilities', []);
   angular.module('LS.models', [ 'LS.utilities' ]);
   angular.module('LS.services', [ 'LS.models' ]);
-  angular.module('LS.controllers', [ 'LS.chrome', 'LS.models', 'LS.services' ]);
+  angular.module('LS.controllers', [ 'LS.chrome', 'LS.services' ]);
 
   angular.module('popupApp', [
     'ngRoute', 'ui.bootstrap',

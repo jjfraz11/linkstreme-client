@@ -2,13 +2,12 @@
 
 (function(){
   angular.module('LS.services').
-    factory('Shared', [ '$rootScope', 'LinkStore', 'UriStore', Shared ]);
+    factory('Shared', [ '$rootScope', 'Data', Shared ]);
 
-  function Shared($rootScope, LinkStore, UriStore) {
+  function Shared($rootScope, Data) {
     var state = {
       currentStreme: { id: null, links: [] },
-      stremeLinks: [],
-      uris: {}
+      stremeLinks: []
     };
 
     var update = function(key, data) {
@@ -30,9 +29,10 @@
     };
 
     var updateStremeLinks = function(streme_id) {
-      LinkStore.findByStremeId(streme_id).
+      return Data.findLinksByStremeId(streme_id).
         then(function(foundLinks) {
-          update('stremeLinks', foundLinks);
+          state.currentStreme.links = foundLinks;
+          return update('stremeLinks', foundLinks);
         });
     };
 
@@ -43,15 +43,14 @@
 
     return {
       currentStreme: state.currentStreme,
-      stremeLinks: state.stremeLinks,
 
       update: update,
 
       register: register,
       load: load,
 
-      updateStremeLinks: function() {
-        updateStremeLinks(state.currentStreme.id)
+      updateStremeLinks: function(streme_id) {
+        updateStremeLinks(state.currentStreme.id || streme_id)
       }
 
     };
