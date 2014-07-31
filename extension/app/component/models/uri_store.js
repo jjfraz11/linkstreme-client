@@ -2,24 +2,11 @@
 
 (function() {
   angular.module('LS.models').
-    factory('UriStore', [ '$q', 'DB', 'Uri', BuildUriStore ]);
+    factory('UriStore', [ '$q', 'Store', 'Uri', BuildUriStore ]);
 
-  function BuildUriStore($q, DB, Uri) {
-    DB.buildStore('uris', {
-      dbVersion: 2,
-      keyPath: 'id',
-      autoIncrement: true,
-
-      indexes: [ {
-        name: 'url',
-        keyPath: 'url',
-        unique: true,
-        multientry: false
-      } ]
-    });
-
+  function BuildUriStore($q, Store, Uri) {
     function UriStore() {
-      DB.Store.call(this, 'uris');
+      Store.call(this, 'uris');
 
       this.objectName = function(uri) {
         return 'Uri Key: ' + uri.url;
@@ -35,20 +22,16 @@
         return uri;
       };
     }
-    UriStore.prototype = Object.create(DB.Store.prototype);
+    UriStore.prototype = Object.create(Store.prototype);
     UriStore.prototype.constructor = UriStore;
 
     UriStore.prototype.findByUrl = function(url) {
       var deferred = $q.defer();
       // Get normalized url
       var normUrl = Uri.normalize(url);
-      var queryOptions = {
-        index: 'url',
-        keyRange: {only: normUrl}
-      };
 
-      this.query(queryOptions).
-        then(function(foundUris){
+      this.store.where('url').equals(normUrl).
+        toArray(function(foundUris){
           if (foundUris.length === 0) {
             deferred.reject('No uris found.');
           } else {

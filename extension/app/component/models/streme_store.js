@@ -2,24 +2,11 @@
 
 (function() {
   angular.module('LS.models').
-    factory('StremeStore', [ '$q', 'DB', BuildStremeStore ]);
+    factory('StremeStore', [ '$q', 'Store', BuildStremeStore ]);
 
-  function BuildStremeStore($q, DB) {
-    DB.buildStore('stremes', {
-      dbVersion: 4,
-      keyPath: 'id',
-      autoIncrement: true,
-
-      indexes: [ {
-        name: 'name',
-        keyPath: 'name',
-        unique: true,
-        multientry: false
-      } ]
-    });
-
+  function BuildStremeStore($q, Store) {
     function StremeStore() {
-      DB.Store.call(this, 'stremes');
+      Store.call(this, 'stremes');
 
       this.objectName = function(streme) {
         return 'Streme Key: ' + streme.name;
@@ -37,7 +24,7 @@
         return streme;
       };
     }
-    StremeStore.prototype = Object.create(DB.Store.prototype);
+    StremeStore.prototype = Object.create(Store.prototype);
     StremeStore.prototype.constructor = StremeStore;
 
     return new StremeStore;
