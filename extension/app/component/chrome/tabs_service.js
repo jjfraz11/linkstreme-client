@@ -2,16 +2,16 @@
 
 (function(){
   angular.module("LS.chrome").
-    factory('Tabs', [ '$q', ChromeTabs ]);
+    factory('Tabs', [ '$q', 'Uri', ChromeTabs ]);
 
-  function ChromeTabs($q) {
+  function ChromeTabs($q, Uri) {
     // Return standard tab object
     var newTab = function(tabData) {
       return {
         tab_id:   tabData.id,
         index:    tabData.index + 1,
         title:    tabData.title,
-        url:      tabData.url,
+        url:      Uri.normalize(tabData.url),
         active:   tabData.highlighted,
         inCurrent: false,
         selected: false
