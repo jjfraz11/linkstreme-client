@@ -6,6 +6,7 @@
 
   // Helper Services
   function Data($q, LinkStore, StremeStore, UriStore) {
+    // Collect Data Start
 
     var saveLink = function(linkData) {
       var deferred = $q.defer();
@@ -30,6 +31,28 @@
       return deferred.promise;
     };
 
+    var saveLinks = function(linkDataArray) {
+      var savePromises = linkDataArray.map(function(linkData) {
+        return saveLink(linkData);
+      });
+
+      return $q.all(savePromises);
+    };
+
+    // Collect Data End
+
+
+    // Discover Data Start
+
+    var removeLink = function(link_id) {
+      return LinkStore.delete(link_id);
+    };
+
+    // Discover Data End
+
+
+    //  Shared Data Start
+
     var findLinksByStremeId = function(streme_id) {
       var deferred = $q.defer();
 
@@ -41,6 +64,11 @@
       return deferred.promise;
     };
 
+    // Shared Data End
+
+
+    // Streme Select Data Start
+
     var saveStreme = function(stremeData) {
       return StremeStore.put(stremeData);
     };
@@ -48,6 +76,8 @@
     var loadStremes = function() {
       return StremeStore.getAll();
     };
+
+    // Streme Select Data End
 
     // var resetDatabase = function(storeName) {
     //   LinkStore.deleteDatabase();
@@ -57,7 +87,11 @@
 
     return {
       findLinksByStremeId: findLinksByStremeId,
-      saveLink:            saveLink,
+
+      saveLink:  saveLink,
+      saveLinks: saveLinks,
+
+      removeLink: removeLink,
 
       saveStreme: saveStreme,
       loadStremes: loadStremes,
