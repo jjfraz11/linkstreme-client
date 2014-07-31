@@ -8,11 +8,13 @@
 
   function CollectCtrl($scope, Data, Shared, Sessions, Tabs){
     var currentStreme;
-    var stremeLinks;
 
-    var setLinkString = function() {
-      $scope.linkString = JSON.stringify(stremeLinks);
-      // alert("LinkString: " + $scope.linkString);
+    var loadCurrentStreme = function() {
+      Shared.load('currentStreme', function(streme) {
+        currentStreme = streme;
+      });
+      $scope.currentStreme = JSON.stringify(currentStreme);
+      alert("Current Streme: " + $scope.currentStreme);
     };
 
     var setCurrentTab = function() {
@@ -22,20 +24,24 @@
             $scope.currentTab = currentTab;
           }
         }, function(message) { alert(message); });
-    }
+    };
 
     // Set active tabs
     var setActiveTabs = function() {
       Tabs.active().
         then(function(activeTabs) {
-          if(activeTabs) {
-            $scope.activeTabs = [];
-            angular.forEach(activeTabs, function(tab) {
-              $scope.activeTabs.push(Tabs.newTab(tab));
+          $scope.activeTabs = [];
+          angular.forEach(activeTabs, function(activeTab) {
+            angular.forEach(currentStreme.links, function(link) {
+              if(link.url == activeTab.url) {
+                activeTab.selected = true;
+                activeTab.inCurrent = true;
+              }
             });
-          }
+            $scope.activeTabs.push(activeTab);
+          });
         }, function(message) { alert(message); });
-    }
+    };
 
     // UI Controls
     $scope.name = 'CollectCtrl';
@@ -52,11 +58,15 @@
 
             Data.saveLink(linkData).
               then(function(link) {
-                Shared.updateStremeLinks();
               }, function(message) { alert(message); });
           }
         });
-        if (!anySelected) { alert('No tabs selected.'); }
+
+        if (!anySelected) {
+          alert('No tabs selected.');
+        } else {
+          Shared.updateStremeLinks();
+        }
       }
     }
 
@@ -84,28 +94,14 @@
       Data.resetDatabase();
     };
 
-
-
     // Initialize collect controller
     // Event Handlers
-    Shared.register($scope, 'currentStreme.update', function(event, streme) {
-      currentStreme = streme;
-    });
     Shared.register($scope, 'stremeLinks.update', function(event, links) {
-      stremeLinks = links;
-      setLinkString();
+      loadCurrentStreme();
       setActiveTabs();
     });
 
-    Shared.load('currentStreme', function(streme) {
-      currentStreme = streme;
-    });
-
-    Shared.load('stremeLinks', function(links) {
-      stremeLinks = links;
-    });
-
-    setLinkString();
+    loadCurrentStreme()
     setCurrentTab();
     setActiveTabs();
   }

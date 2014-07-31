@@ -5,16 +5,33 @@
     factory('Tabs', [ '$q', ChromeTabs ]);
 
   function ChromeTabs($q) {
+    // Return standard tab object
+    var newTab = function(tabData) {
+      return {
+        tab_id:   tabData.id,
+        index:    tabData.index + 1,
+        title:    tabData.title,
+        url:      tabData.url,
+        active:   tabData.highlighted,
+        inCurrent: false,
+        selected: false
+      };
+    }
+
     return {
       active: function() {
         var queryParams = {
           'lastFocusedWindow': true
         };
         var deferred = $q.defer();
+        var activeTabs = [];
 
         chrome.tabs.query(queryParams, function(tabs){
           if(tabs) {
-            deferred.resolve(tabs);
+            angular.forEach(tabs, function(tabData) {
+              activeTabs.push(newTab(tabData));
+            });
+            deferred.resolve(activeTabs);
           } else {
             deferred.reject('Tabs ' + tabs + ' is not valid.');
           }
@@ -55,18 +72,6 @@
 
       update: function(tab_id, options) {
         chrome.tabs.update(tab_id, options);
-      },
-
-      // Return standard tab object
-      newTab: function(tabData) {
-        return {
-          tab_id:   tabData.id,
-          index:    tabData.index + 1,
-          title:    tabData.title,
-          url:      tabData.url,
-          active:   tabData.highlighted,
-          selected: false
-        };
       }
     };
   }

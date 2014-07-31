@@ -34,9 +34,10 @@
       add: function(stremeData) {
         Data.saveStreme(stremeData).
           then(function(streme_id) {
+            stremeData.id = streme_id;
+            $scope.linkstreme.select(stremeData);
             $scope.linkstreme.showNew = false;
             $scope.linkstreme.updateStremes();
-            $scope.linkstreme.select(streme);
           }, function(message) {
             alert(message);
           });
