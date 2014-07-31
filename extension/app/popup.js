@@ -9,7 +9,8 @@
   angular.module('LS.controllers', [ 'LS.chrome', 'LS.models', 'LS.services' ]);
 
   angular.module('popupApp', [
-    'ngRoute', 'ui.bootstrap', 'LS.controllers', 'LS.services'
+    'ngRoute', 'ui.bootstrap',
+    'LS.controllers', 'LS.services'
   ]).config(['$routeProvider', function($routeProvider) {
     $routeProvider.
       when('/collect', {

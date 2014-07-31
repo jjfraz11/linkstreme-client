@@ -2,11 +2,11 @@
 
 (function() {
   angular.module('LS.models').
-    factory('UriStore', [ '$q', 'Store', 'Uri', BuildUriStore ]);
+    factory('UriStore', [ '$q', 'StoreBase', 'Uri', BuildUriStore ]);
 
-  function BuildUriStore($q, Store, Uri) {
+  function BuildUriStore($q, StoreBase, Uri) {
     function UriStore() {
-      Store.call(this, 'uris');
+      StoreBase.call(this, 'uris');
 
       this.objectName = function(uri) {
         return 'Uri Key: ' + uri.url;
@@ -22,7 +22,7 @@
         return uri;
       };
     }
-    UriStore.prototype = Object.create(Store.prototype);
+    UriStore.prototype = Object.create(StoreBase.prototype);
     UriStore.prototype.constructor = UriStore;
 
     UriStore.prototype.findByUrl = function(url) {

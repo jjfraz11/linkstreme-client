@@ -2,11 +2,11 @@
 
 (function() {
   angular.module('LS.models').
-    factory('LinkStore', [ '$q', 'Store', BuildLinkStore ]);
+    factory('LinkStore', [ '$q', 'StoreBase', BuildLinkStore ]);
 
-  function BuildLinkStore($q, Store) {
+  function BuildLinkStore($q, StoreBase) {
     function LinkStore() {
-      Store.call(this, 'links');
+      StoreBase.call(this, 'links');
 
       var getStremeUriKey = function(streme, uri) {
         return streme.id + ':' + uri.id
@@ -34,7 +34,7 @@
         return link;
       };
     }
-    LinkStore.prototype = Object.create(Store.prototype);
+    LinkStore.prototype = Object.create(StoreBase.prototype);
     LinkStore.prototype.constructor = LinkStore;
 
     // Should return a list of Uris associated with given links
