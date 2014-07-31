@@ -14,7 +14,6 @@
         currentStreme = streme;
       });
       $scope.currentStreme = JSON.stringify(currentStreme);
-      alert("Current Streme: " + $scope.currentStreme);
     };
 
     var setCurrentTab = function() {
@@ -34,7 +33,6 @@
           angular.forEach(activeTabs, function(activeTab) {
             angular.forEach(currentStreme.links, function(link) {
               if(link.url == activeTab.url) {
-                activeTab.selected = true;
                 activeTab.inCurrent = true;
               }
             });
@@ -50,27 +48,30 @@
       if (!currentStreme.id) {
         alert('No streme selected.');
       } else {
-        var anySelected;
+        var linksToSave = [];
+        var savedLinks = [];
+
         angular.forEach($scope.activeTabs, function(tab) {
           if(tab.selected) {
-            anySelected = true;
             var linkData = { streme: currentStreme, url: tab.url };
-
-            Data.saveLink(linkData).
-              then(function(link) {
-              }, function(message) { alert(message); });
+            linksToSave.push(linkData);
           }
         });
-
-        if (!anySelected) {
+        if (linksToSave.length === 0) {
           alert('No tabs selected.');
+          return;
         } else {
-          Shared.updateStremeLinks();
+          Data.saveLinks(linksToSave).
+            then(function(savedLinks) {
+              if(savedLinks.length != linksToSave.length) { alert('Something is wrong.'); }
+              Shared.updateStremeLinks();
+            }, function(message) { alert(message); });
         }
-      }
-    }
 
-    // Todo: prevent user from opening tabs closed before popup opened
+      }
+    };
+
+    // Todo: disable undo close tab for tabs not closed by popup
     // Todo: prevent reopened tab from gaining focus and closing popup
     $scope.undoCloseTab = function() {
       Sessions.restoreLastTab();
@@ -95,7 +96,6 @@
     };
 
     // Initialize collect controller
-    // Event Handlers
     Shared.register($scope, 'stremeLinks.update', function(event, links) {
       loadCurrentStreme();
       setActiveTabs();
