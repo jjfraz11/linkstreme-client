@@ -2,11 +2,11 @@
 
 (function(){
   angular.module('LS.services').
-    factory('Shared', [ '$rootScope', 'Data', Shared ]);
+    factory('Shared', [ '$rootScope', 'Data', 'Storage', Shared ]);
 
-  function Shared($rootScope, Data) {
+  function Shared($rootScope, Data, Storage) {
     var state = {
-      currentStreme: { id: null, links: [] },
+      currentStreme: { id: null, name: 'Select Streme...', links: [] },
       stremeLinks: []
     };
 
@@ -32,6 +32,8 @@
       return Data.findLinksByStremeId(streme_id).
         then(function(foundLinks) {
           state.currentStreme.links = foundLinks;
+          chrome.storage.local.
+            set({'currentStreme': JSON.stringify(state.currentStreme)});
           return update('stremeLinks', foundLinks);
         });
     };
@@ -40,6 +42,11 @@
     register($rootScope, 'currentStreme.update', function(event, streme) {
       updateStremeLinks(streme.id);
     });
+
+    Storage.get('currentStreme').
+      then(function(result) {
+        update('currentStreme', JSON.parse(result.currentStreme));
+      }, function(message) { alert(message); });
 
     return {
       currentStreme: state.currentStreme,
