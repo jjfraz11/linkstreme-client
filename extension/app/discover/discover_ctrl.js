@@ -5,22 +5,25 @@
     controller('DiscoverCtrl', [ '$scope', 'Data', 'Shared', DiscoverCtrl ]);
 
   function DiscoverCtrl($scope, Data, Shared){
+    var loadCurrentStreme = function() {
+      Shared.load('currentStreme', function(currentStreme) {
+        $scope.currentStreme = currentStreme;
+      });
+    };
+
     $scope.name = 'DiscoverCtrl'
 
     $scope.removeLink = function(link_id) {
       Data.removeLink(link_id).
-        then(function(retVal) {
-          alert(JSON.stringify(retVal));
+        then(function() {
           Shared.updateStremeLinks();
         }, function(message) { alert(message); });
     };
 
     Shared.register($scope, 'stremeLinks.update', function(event, links) {
-      $scope.stremeLinks = links;
+      loadCurrentStreme();
     });
 
-    Shared.load('stremeLinks', function(links) {
-      $scope.stremeLinks = links;
-    });
+    loadCurrentStreme();
   }
 })();

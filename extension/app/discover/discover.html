@@ -1,7 +1,7 @@
 <div>
   Hello Discover<br />
   <ul>
-    <li ng-repeat="link in stremeLinks">
+    <li ng-repeat="link in currentStreme.links">
       {{ link.streme_id + ' - ' + link.uri_id + ' - ' + link.url }}
       <i class="glyphicon glyphicon-remove"
          tooltip="Remove Link" ng-click="removeLink(link.id);"></i>

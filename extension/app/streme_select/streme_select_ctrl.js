@@ -5,13 +5,7 @@
     controller('StremeSelectCtrl', [ '$scope', '$modal', 'Shared', StremeSelectCtrl ]);
 
   function StremeSelectCtrl($scope, $modal, Shared) {
-    $scope.currentStreme = { name: 'Select Streme...' };
     $scope.name = 'StremeSelectCtrl';
-
-    // Event Handlers
-    Shared.register($scope, 'currentStreme.update', function(event, streme) {
-      $scope.currentStreme = streme;
-    });
 
     $scope.open = function(stremeType) {
       var modalInstance = $modal.open({
@@ -26,7 +20,15 @@
       modalInstance.result.
         then(function(streme) { Shared.update('currentStreme', streme); },
              function() { console.log('No streme selected.'); });
-    }
+    };
+
+    Shared.register($scope, 'currentStreme.update', function(event, streme) {
+      $scope.currentStreme = streme;
+    });
+
+    Shared.load('currentStreme', function(currentStreme) {
+      $scope.currentStreme = currentStreme;
+    });
   }
 
 })();
