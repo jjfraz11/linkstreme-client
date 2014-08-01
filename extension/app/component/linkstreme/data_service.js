@@ -2,10 +2,11 @@
 
 (function(){
   angular.module('LS.services').
-    factory('Data', [ '$q', 'LinkStore', 'StremeStore', 'UriStore', Data ]);
+    factory('Data', [ '$q', 'EntityTagStore', 'LinkStore', 'StremeStore', 'UriStore',
+                      'TagStore', Data ]);
 
   // Helper Services
-  function Data($q, LinkStore, StremeStore, UriStore) {
+  function Data($q, EntityTagStore, LinkStore, StremeStore, UriStore, TagStore) {
     // Collect Data Start
 
     var saveLink = function(linkData) {

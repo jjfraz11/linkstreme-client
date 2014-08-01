@@ -27,6 +27,10 @@
           <span class="link-url">{{ tab.url }}</span>
 
         </accordion-heading>
+
+        <ul>
+          <li ng-repeat="tag in tab.tags">{{ tag.name }}</li>
+        </ul>
       </accordion-group>
     </div>
   </accordion>

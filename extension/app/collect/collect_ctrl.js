@@ -17,15 +17,22 @@
 
     // Set active tabs
     var setActiveTabs = function() {
+      var defaultTags = [
+        { name: 'one' },
+        { name: 'two' },
+        { name: 'three' }
+      ];
+
       Tabs.active().
         then(function(tabs) {
           $scope.activeTabs = [];
           angular.forEach(tabs, function(tab) {
             angular.forEach(currentStreme.links, function(link) {
-              if(link.url == tab.url) {
+              if(link.uri_url == tab.url) {
                 tab.link = link;
+                tab.tags = link.tags || defaultTags;
                 tab.selected = true;
-                tab.inCurrent = true;
+                tab.saved = true;
               }
             });
             $scope.activeTabs.push(tab);
@@ -44,13 +51,13 @@
         var linkIdsToDelete = [];
 
         angular.forEach($scope.activeTabs, function(tab) {
-          if(tab.inCurrent) {
-            // Delete un-selected tabs in current
+          if(tab.saved) {
+            // Delete un-selected tabs if currently saved
             if (!tab.selected) {
               linkIdsToDelete.push(tab.link.id);
             }
           } else {
-            // Save selected links not in current
+            // Save selected links not currently saved
             if(tab.selected) {
               var linkData = { streme: currentStreme, url: tab.url };
               linkDataToSave.push(linkData);
@@ -86,8 +93,9 @@
         then(function(tab_id) { setActiveTabs(); });
     }
 
+    // TODO: Need to update this functionality
     $scope.resetDatabase = function() {
-      Data.resetDatabase();
+      // Data.resetDatabase();
     };
 
     // Initialize collect controller

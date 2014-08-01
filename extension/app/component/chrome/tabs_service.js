@@ -12,11 +12,12 @@
         index:    tabData.index + 1,
         title:    tabData.title,
         url:      Uri.normalize(tabData.url),
+        tags:     [],
 
-        active:    tabData.highlighted,
-        changed:   false,
-        inCurrent: false,
-        selected:  false
+        active:   tabData.highlighted,
+        changed:  false,
+        saved:    false,
+        selected: false
       };
     }
 
