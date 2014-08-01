@@ -5,50 +5,61 @@
     factory('Storage', [ '$q', ChromeStorage ]);
 
   function ChromeStorage($q) {
-    var storage;
-    // if (type == 'local') {
-    if (true) {
-      // storage = chrome.storage.local;
-    } else {
-      alert('Unknown chrome storage type: ' + type);
-      return {};
-    }
+    var get = function(key) {
+      var deferred = $q.defer();
 
-    return {
-      get: function(key) {
-        var deferred = $q.defer();
-
-        storage.get(key, function(found){
+      chrome.storage.local.
+        get(key, function(object) {
           if(chrome.runtime.lastError) {
             var message = runtime.lastError.message;
             console.log('chromeStorageError: ' + message);
             deferred.reject(message);
           } else {
-            console.log('Retrieved data for ' + key);
-            deferred.resolve(found)
+            console.log("Loaded '" + key + "' from storage.");
+            deferred.resolve(object);
           }
         });
 
-        return deferred.promise;
-      },
+      return deferred.promise;
+    };
 
-      set: function(data) {
-        var deferred = $q.defer();
+    return {
+      get: get,
 
-        storage.set(data, function(){
-          if(chrome.runtime.lastError) {
-            message = runtime.lastError.message;
-            console.log('chromeStorageError: ' + message);
-            deferred.reject(message);
-          } else {
-            console.log('Keys: ' + data.keys());
-            alert('Saved link for ' + data.keys(0));
-            deferred.resolve(true);
-          }
-        });
+      // get: function(key) {
+      //   var deferred = $q.defer();
 
-        return deferred.promise;
-      }
+      //   chrome.storage.local.get(key, function(found){
+      //     if(chrome.runtime.lastError) {
+      //       var message = runtime.lastError.message;
+      //       console.log('chromeStorageError: ' + message);
+      //       deferred.reject(message);
+      //     } else {
+      //       console.log('Retrieved data for ' + key);
+      //       deferred.resolve(found)
+      //     }
+      //   });
+
+      //   return deferred.promise;
+      // },
+
+      // set: function(data) {
+      //   var deferred = $q.defer();
+
+      //   chrome.storage.local.set(data, function(){
+      //     if(chrome.runtime.lastError) {
+      //       message = runtime.lastError.message;
+      //       console.log('chromeStorageError: ' + message);
+      //       deferred.reject(message);
+      //     } else {
+      //       console.log('Keys: ' + data.keys());
+      //       alert('Saved link for ' + data.keys(0));
+      //       deferred.resolve(true);
+      //     }
+      //   });
+
+      //   return deferred.promise;
+      // }
     };
   }
 })();
