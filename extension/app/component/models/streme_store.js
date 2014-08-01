@@ -18,8 +18,7 @@
         }
 
         var streme = {
-          name: stremeData.name,
-          links: stremeData.links || []
+          name: stremeData.name
         };
         return streme;
       };

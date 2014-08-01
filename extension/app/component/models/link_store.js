@@ -8,12 +8,12 @@
     function LinkStore() {
       StoreBase.call(this, 'links');
 
-      var getStremeUriKey = function(streme, uri) {
+      var getLinkKey = function(streme, uri) {
         return streme.id + ':' + uri.id
       };
 
       this.objectName = function(link) {
-        return 'Link Key: ' + link.streme_uri_key;
+        return 'Link Key: ' + link.link_key;
       };
 
       this.setupNew = function(linkData) {
@@ -26,11 +26,11 @@
         }
 
         var link = {
+          link_key:    getLinkKey(linkData.streme, linkData.uri),
           streme_id:   linkData.streme.id,
           streme_name: linkData.streme.name,
           uri_id:      linkData.uri.id,
-          url:         linkData.uri.url,
-          streme_uri_key: getStremeUriKey(linkData.streme, linkData.uri),
+          uri_url:     linkData.uri.url
         };
         return link;
       };

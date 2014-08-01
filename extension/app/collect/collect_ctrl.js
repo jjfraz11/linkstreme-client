@@ -3,8 +3,7 @@
 (function(){
   angular.module('LS.controllers').
     controller('CollectCtrl',
-               [ '$scope', 'Data', 'Shared',
-                 'Sessions', 'Tabs', CollectCtrl ]);
+               [ '$scope', 'Data', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]);
 
   function CollectCtrl($scope, Data, Shared, Sessions, Tabs){
     var currentStreme;

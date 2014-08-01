@@ -6,7 +6,7 @@
 
   function Shared($rootScope, Data, Storage) {
     var state = {
-      currentStreme: { id: null, name: 'Select Streme...', links: [] },
+      currentStreme: { id: null, name: 'Select Streme...' },
       stremeLinks: []
     };
 
