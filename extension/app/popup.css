@@ -16,9 +16,26 @@ html, body {
 }
 
 .glyphicon-remove {
+    color: grey;
+}
+
+.glyphicon-plus {
+    color: green;
+}
+
+.glyphicon-minus {
     color: red;
+}
+
+.changed {
+    border-color: black;
+    border-radius: 8px;
+}
+
+.tab-controls {
     float: right;
 }
+
 
 #control {
     background-color: white;

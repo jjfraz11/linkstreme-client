@@ -1,7 +1,7 @@
 <div>
   <!-- TODO: This should be split button dropdown with more opts -->
   <button type="button" class="btn btn-primary"
-          ng-click="saveLinks()">Save Links</button>
+          ng-click="saveStreme()">Save Streme</button>
   <button type="button" class="btn btn-default"
           ng-click="undoCloseTab()">Undo Tab Close</button>
   <button type="button" class="btn btn-default"
@@ -14,12 +14,15 @@
 
   <accordion>
     <div ng-repeat="tab in activeTabs">
-      <accordion-group is-open="tab.active">
+      <accordion-group is-open="tab.active" ng-class="{ changed: tab.changed }" >
         <accordion-heading>
-          <i class="glyphicon glyphicon-remove" tooltip="Close Tab"
-             ng-click="closeTab(tab.tab_id,$event);"></i>
-          <input type="checkbox" ng-model="tab.selected"
-                 ng-if="!tab.inCurrent" ng-click="toggleTab(tab, $event);"></input>
+          <div class="tab-controls">
+            <i class="glyphicon" ng-click="toggleTab(tab, $event);"
+               ng-class="{'glyphicon-plus': !tab.selected,'glyphicon-minus': tab.selected }"
+               tooltip="{{ ( tab.selected ? 'Remove' : 'Add' ) + ' Link' }}"></i>
+            <i class="glyphicon glyphicon-remove" tooltip="Close Tab"
+               ng-click="closeTab(tab.tab_id,$event);"></i>
+          </div>
           <span class="link-title">#{{ tab.index }} - {{ tab.title }}</span><br />
           <span class="link-url">{{ tab.url }}</span>
 

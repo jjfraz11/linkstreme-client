@@ -39,13 +39,25 @@
       return $q.all(savePromises);
     };
 
-    // Collect Data End
-
-
-    // Discover Data Start
-
     var removeLink = function(link_id) {
       return LinkStore.delete(link_id);
+    };
+
+    var removeLinks = function(linkIdArray) {
+      var removePromises = linkIdArray.map(function(link_id) {
+        return removeLink(link_id);
+      });
+
+      return $q.all(removePromises);
+    };
+
+    var updateStreme = function(linkDataToSave, linkIdsToRemove) {
+      var updatePromises = {
+        saved: saveLinks(linkDataToSave),
+        deleted: removeLinks(linkIdsToRemove)
+      };
+
+      return $q.all(updatePromises);
     };
 
     // Discover Data End
@@ -95,6 +107,7 @@
 
       saveStreme: saveStreme,
       loadStremes: loadStremes,
+      updateStreme: updateStreme,
 
       resetDatabase:       function(){} // resetDatabase
     };

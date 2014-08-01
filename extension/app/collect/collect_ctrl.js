@@ -16,27 +16,20 @@
       $scope.currentStreme = JSON.stringify(currentStreme);
     };
 
-    var setCurrentTab = function() {
-      Tabs.current().
-        then(function(currentTab) {
-          if(currentTab) {
-            $scope.currentTab = currentTab;
-          }
-        }, function(message) { alert(message); });
-    };
-
     // Set active tabs
     var setActiveTabs = function() {
       Tabs.active().
-        then(function(activeTabs) {
+        then(function(tabs) {
           $scope.activeTabs = [];
-          angular.forEach(activeTabs, function(activeTab) {
+          angular.forEach(tabs, function(tab) {
             angular.forEach(currentStreme.links, function(link) {
-              if(link.url == activeTab.url) {
-                activeTab.inCurrent = true;
+              if(link.url == tab.url) {
+                tab.link = link;
+                tab.selected = true;
+                tab.inCurrent = true;
               }
             });
-            $scope.activeTabs.push(activeTab);
+            $scope.activeTabs.push(tab);
           });
         }, function(message) { alert(message); });
     };
@@ -44,30 +37,32 @@
     // UI Controls
     $scope.name = 'CollectCtrl';
 
-    $scope.saveLinks = function() {
+    $scope.saveStreme = function() {
       if (!currentStreme.id) {
         alert('No streme selected.');
       } else {
-        var linksToSave = [];
-        var savedLinks = [];
+        var linkDataToSave = [];
+        var linkIdsToDelete = [];
 
         angular.forEach($scope.activeTabs, function(tab) {
-          if(tab.selected) {
-            var linkData = { streme: currentStreme, url: tab.url };
-            linksToSave.push(linkData);
+          if(tab.inCurrent) {
+            // Delete un-selected tabs in current
+            if (!tab.selected) {
+              linkIdsToDelete.push(tab.link.id);
+            }
+          } else {
+            // Save selected links not in current
+            if(tab.selected) {
+              var linkData = { streme: currentStreme, url: tab.url };
+              linkDataToSave.push(linkData);
+            }
           }
         });
-        if (linksToSave.length === 0) {
-          alert('No tabs selected.');
-          return;
-        } else {
-          Data.saveLinks(linksToSave).
-            then(function(savedLinks) {
-              if(savedLinks.length != linksToSave.length) { alert('Something is wrong.'); }
-              Shared.updateStremeLinks();
-            }, function(message) { alert(message); });
-        }
 
+        Data.updateStreme(linkDataToSave, linkIdsToDelete).
+          then(function(result) {
+            Shared.updateStremeLinks();
+          }, function(message) { alert(message); });
       }
     };
 
@@ -82,6 +77,7 @@
       // Disable click event for checkbox element
       $event.stopPropagation();
       tab.selected = !tab.selected;
+      tab.changed = !tab.changed;
     }
 
     $scope.closeTab = function(tab_id, $event) {
@@ -102,7 +98,6 @@
     });
 
     loadCurrentStreme()
-    setCurrentTab();
     setActiveTabs();
   }
 })();
