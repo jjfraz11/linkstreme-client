@@ -8,8 +8,10 @@
   function IndexedDB() {
     var db = new Dexie('linkstreme');
     db.version(1).stores({
-      links: '++id,&streme_uri_key,streme_id,uri_id',
+      links: '++id,&link_key,streme_id,uri_id',
       stremes: '++id,&name',
+      entityTags: '++id,&entity_tag_key,tag_id,entity_id,entity_type',
+      tags: '++id,&name',
       uris: '++id,&url'
     });
 
@@ -18,16 +20,26 @@
     });
 
     var Link = db.links.defineClass({
-      streme_uri_key: String,
-      streme_id: Number,
+      link_key:    String,
+      streme_id:   Number,
       streme_name: String,
-      uri_id: Number,
-      uri_url: String
+      uri_id:      Number,
+      uri_url:     String
     });
 
     var Streme = db.stremes.defineClass({
-      name: String,
-      links: [ Link ]
+      name: String
+    });
+
+    var Tag = db.tags.defineClass({
+      name: String
+    });
+
+    var EntityTag = db.entityTags.defineClass({
+      entity_tag_key: String,
+      entity_id:      Number,
+      entity_type:    String,
+      tag_id:         Number
     });
 
     db.open();
