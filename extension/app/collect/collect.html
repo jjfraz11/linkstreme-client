@@ -27,10 +27,16 @@
           <span class="link-url">{{ tab.url }}</span>
 
         </accordion-heading>
-
         <ul>
           <li ng-repeat="tag in tab.tags">{{ tag.name }}</li>
         </ul>
+
+        <div collapse="!tab.saved">
+          <form novalidate class="simple-form">
+            Name: <input type="text" ng-model="tab.new_tag_name" />
+            <button ng-click="addTag(tab)">Add Tag</button>
+          </form>
+        </div>
       </accordion-group>
     </div>
   </accordion>

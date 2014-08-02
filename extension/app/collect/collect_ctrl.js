@@ -93,6 +93,26 @@
         then(function(tab_id) { setActiveTabs(); });
     }
 
+    $scope.addTag = function(tab) {
+      if (!tab.link.id) {
+        alert('This tab is not saved in a streme.');
+      }
+
+      var entityTagData = {
+        tag: {
+          name: tab.new_tag_name,
+        },
+        entity: {
+          id: tab.link.id,
+          type: 'link'
+        }
+      };
+      Data.saveEntityTag(entityTagData).
+        then(function(entityTag) {
+          alert(JSON.stringify(entityTag));
+        }, function(message) { alert(message); });
+    };
+
     // TODO: Need to update this functionality
     $scope.resetDatabase = function() {
       // Data.resetDatabase();

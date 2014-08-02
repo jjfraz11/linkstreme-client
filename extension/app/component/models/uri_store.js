@@ -52,8 +52,8 @@
         },function(message) {
           console.log(message);
           self.put({url: url}).
-            then(function(uriId) {
-              return self.get(uriId);
+            then(function(uri_id) {
+              return self.get(uri_id);
             }).
             then(function(uri) {
               deferred.resolve(uri);
