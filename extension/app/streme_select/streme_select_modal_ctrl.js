@@ -44,7 +44,7 @@
       },
 
       create: function() {
-        $scope.newStreme = { links: [] };
+        $scope.newStreme = {};
         $scope.linkstreme.showNew = true;
       },
 
