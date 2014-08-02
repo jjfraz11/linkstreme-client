@@ -12,7 +12,7 @@
     var saveLink = function(linkData) {
       var deferred = $q.defer();
       if(!linkData.url) {
-        deferred.resolve('Invalid url: ' + JSON.stringify(url));
+        deferred.resolve('No url found: ' + JSON.stringify(linkData));
       } else {
         UriStore.findOrCreateByUrl(linkData.url).
           // This function takes a uri and creates a link in currrentStreme
@@ -61,10 +61,13 @@
       return $q.all(updatePromises);
     };
 
-    // Discover Data End
+    var saveStreme = function(stremeData) {
+      return StremeStore.put(stremeData);
+    };
 
-
-    //  Shared Data Start
+    var loadStremes = function() {
+      return StremeStore.getAll();
+    };
 
     var findLinksByStremeId = function(streme_id) {
       var deferred = $q.defer();
@@ -77,40 +80,44 @@
       return deferred.promise;
     };
 
-    // Shared Data End
+    var saveEntityTag = function(entityTagData) {
+      var deferred = $q.defer();
+      if(!entityTagData.tag.name) {
+        deferred.resolve('No tag name found: ' + JSON.stringify(entityTagData));
+      } else {
+        TagStore.findOrCreateByName(entityTagData.tag.name).
+          then(function(tag) {
+            entityTagData.tag.id = tag.id;
+            return EntityTagStore.put(entityTagData);
+          }).
+          then(function(entity_tag_id) {
+            return EntityTagStore.get(entity_tag_id);
+          }).
+          then(function(entity_tag) {
+            deferred.resolve(entity_tag);
+          }, function(message) { deferred.reject(message); });
+      }
 
-
-    // Streme Select Data Start
-
-    var saveStreme = function(stremeData) {
-      return StremeStore.put(stremeData);
+      return deferred.promise;
     };
 
-    var loadStremes = function() {
-      return StremeStore.getAll();
+    var resetDatabase = function(storeName) {
     };
-
-    // Streme Select Data End
-
-    // var resetDatabase = function(storeName) {
-    //   LinkStore.deleteDatabase();
-    //   StremeStore.deleteDatabase();
-    //   UriStore.deleteDatabase();
-    // };
 
     return {
-      findLinksByStremeId: findLinksByStremeId,
-
       saveLink:  saveLink,
       saveLinks: saveLinks,
-
       removeLink: removeLink,
+      removeLinks: removeLinks,
+      updateStreme: updateStreme,
 
       saveStreme: saveStreme,
       loadStremes: loadStremes,
-      updateStreme: updateStreme,
+      findLinksByStremeId: findLinksByStremeId,
 
-      resetDatabase:       function(){} // resetDatabase
+      saveEntityTag: saveEntityTag,
+
+      resetDatabase: resetDatabase
     };
   }
 })();
