@@ -23,43 +23,29 @@
       return deferred.promise;
     };
 
+    var set = function(key, data) {
+      var deferred = $q.defer();
+      var setData = {};
+      setData[key] = JSON.stringify(data);
+
+      chrome.storage.local.
+        set(setData, function() {
+          if(chrome.runtime.lastError) {
+            var message = runtime.lastError.message;
+            console.log('chromeStorageError: ' + message);
+            deferred.reject(message);
+          } else {
+            console.log("Saved '" + key + "' to storage");
+            deferred.resolve();
+          }
+        });
+
+      return deferred.promise;
+    };
+
     return {
       get: get,
-
-      // get: function(key) {
-      //   var deferred = $q.defer();
-
-      //   chrome.storage.local.get(key, function(found){
-      //     if(chrome.runtime.lastError) {
-      //       var message = runtime.lastError.message;
-      //       console.log('chromeStorageError: ' + message);
-      //       deferred.reject(message);
-      //     } else {
-      //       console.log('Retrieved data for ' + key);
-      //       deferred.resolve(found)
-      //     }
-      //   });
-
-      //   return deferred.promise;
-      // },
-
-      // set: function(data) {
-      //   var deferred = $q.defer();
-
-      //   chrome.storage.local.set(data, function(){
-      //     if(chrome.runtime.lastError) {
-      //       message = runtime.lastError.message;
-      //       console.log('chromeStorageError: ' + message);
-      //       deferred.reject(message);
-      //     } else {
-      //       console.log('Keys: ' + data.keys());
-      //       alert('Saved link for ' + data.keys(0));
-      //       deferred.resolve(true);
-      //     }
-      //   });
-
-      //   return deferred.promise;
-      // }
+      set: set,
     };
   }
 })();
