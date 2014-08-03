@@ -5,6 +5,13 @@
     controller('StremeSelectCtrl', [ '$scope', '$modal', 'Shared', StremeSelectCtrl ]);
 
   function StremeSelectCtrl($scope, $modal, Shared) {
+    var loadCurrentStreme = function() {
+      Shared.load('currentStreme', function(currentStreme) {
+        $scope.currentStreme = currentStreme;
+        alert('StremeSelect current: ' + JSON.stringify($scope.currentStreme));
+      });
+    };
+
     $scope.name = 'StremeSelectCtrl';
 
     $scope.open = function(stremeType) {
@@ -23,12 +30,10 @@
     };
 
     Shared.register($scope, 'currentStreme.update', function(event, streme) {
-      $scope.currentStreme = streme;
+      loadCurrentStreme();
     });
 
-    Shared.load('currentStreme', function(currentStreme) {
-      $scope.currentStreme = currentStreme;
-    });
+    loadCurrentStreme();
   }
 
 })();
