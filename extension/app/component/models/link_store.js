@@ -40,10 +40,12 @@
 
     // Should return a list of Uris associated with given links
     LinkStore.prototype.findByStremeId = function(streme_id) {
-      if (!streme_id) {
-        alert('No streme id given: ' + JSON.stringify(streme_id));
-      }
       var deferred = $q.defer();
+
+      if (!streme_id) {
+        deferred.reject('No streme id given: ' + JSON.stringify(streme_id));
+        return deferred.promise;
+      }
 
       this.store.where('streme_id').equals(streme_id).
         toArray(function(foundLinks) {
