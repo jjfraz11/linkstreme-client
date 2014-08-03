@@ -11,6 +11,7 @@
     var loadCurrentStreme = function() {
       Shared.load('currentStreme', function(streme) {
         currentStreme = streme;
+        alert('Collect current: ' + JSON.stringify(currentStreme));
       });
       $scope.currentStreme = JSON.stringify(currentStreme);
     };
@@ -27,14 +28,16 @@
         then(function(tabs) {
           $scope.activeTabs = [];
           angular.forEach(tabs, function(tab) {
-            angular.forEach(currentStreme.links, function(link) {
-              if(link.uri_url == tab.url) {
-                tab.link = link;
-                tab.tags = link.tags || defaultTags;
-                tab.selected = true;
-                tab.saved = true;
-              }
-            });
+            if(currentStreme.hasOwnProperty('links')) {
+              angular.forEach(currentStreme.links, function(link) {
+                if(link.uri_url == tab.url) {
+                  tab.link = link;
+                  tab.tags = link.tags || defaultTags;
+                  tab.selected = true;
+                  tab.saved = true;
+                }
+              });
+            }
             $scope.activeTabs.push(tab);
           });
         }, function(message) { alert(message); });
@@ -119,7 +122,7 @@
     };
 
     // Initialize collect controller
-    Shared.register($scope, 'stremeLinks.update', function(event, links) {
+    Shared.register($scope, 'currentStreme.links.update', function(event, links) {
       loadCurrentStreme();
       setActiveTabs();
     });
