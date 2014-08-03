@@ -80,6 +80,23 @@
       return deferred.promise;
     };
 
+    var findTagsByLinkId = function(link_id) {
+      var deferred = $q.defer();
+
+      EntityTagStore.findByEntityId(link_id, 'link').
+        then(function(foundEntityTags) {
+          var getTagPromises = foundEntityTags.map(function(entityTag) {
+            TagStore.get(entityTag.tag_id);
+          });
+          return $q.all(getTagPromises);
+        }, function(message) { deferred.reject(message); }).
+        then(function(foundTags) {
+          deferred.resolve(foundTags);
+        }, function(message) { deferred.reject(message); });
+
+      return deferred.promise;
+    };
+
     var saveEntityTag = function(entityTagData) {
       var deferred = $q.defer();
       if(!entityTagData.tag.name) {
@@ -116,6 +133,7 @@
       findLinksByStremeId: findLinksByStremeId,
 
       saveEntityTag: saveEntityTag,
+      findTagsByLinkId: findTagsByLinkId,
 
       resetDatabase: resetDatabase
     };
