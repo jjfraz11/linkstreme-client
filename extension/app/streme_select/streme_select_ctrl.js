@@ -6,7 +6,7 @@
 
   function StremeSelectCtrl($scope, $modal, Shared) {
     var loadCurrentStreme = function() {
-      Shared.load('currentStreme', function(currentStreme) {
+      Shared.get('currentStreme', function(currentStreme) {
         $scope.currentStreme = currentStreme;
         alert('StremeSelect current: ' + JSON.stringify($scope.currentStreme));
       });
@@ -25,7 +25,7 @@
       });
 
       modalInstance.result.
-        then(function(streme) { Shared.update('currentStreme', streme); },
+        then(function(streme) { Shared.set('currentStreme', streme); },
              function() { console.log('No streme selected.'); });
     };
 

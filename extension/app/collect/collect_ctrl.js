@@ -9,7 +9,7 @@
     var currentStreme;
 
     var loadCurrentStreme = function() {
-      Shared.load('currentStreme', function(streme) {
+      Shared.get('currentStreme', function(streme) {
         currentStreme = streme;
         alert('Collect current: ' + JSON.stringify(currentStreme));
       });
