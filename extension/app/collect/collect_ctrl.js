@@ -11,7 +11,6 @@
     var loadCurrentStreme = function() {
       Shared.get('currentStreme', function(streme) {
         currentStreme = streme;
-        alert('Collect current: ' + JSON.stringify(currentStreme));
       });
       $scope.currentStreme = JSON.stringify(currentStreme);
     };
@@ -113,6 +112,7 @@
       Data.saveEntityTag(entityTagData).
         then(function(entityTag) {
           alert(JSON.stringify(entityTag));
+          Shared.updateLinkTags(entityTag.entity_id);
         }, function(message) { alert(message); });
     };
 
