@@ -12,11 +12,11 @@
         get(key, function(object) {
           if(chrome.runtime.lastError) {
             var message = runtime.lastError.message;
-            console.log('chromeStorageError: ' + message);
             deferred.reject(message);
+            console.log('chromeStorageError: ' + message);
           } else {
+            deferred.resolve(JSON.parse(object[key]));
             console.log("Loaded '" + key + "' from storage.");
-            deferred.resolve(object);
           }
         });
 
