@@ -1,9 +1,5 @@
 'use strict';
 
-Object.toType = function(obj) {
-  return ({}).toString.call(obj).match(/\s([a-z|A-Z]+)/)[1].toLowerCase();
-}
-
 (function(){
     // Setup Dependencies for Linkstreme Modules. This file must be required first.
   angular.module('LS.utilities', []);
@@ -33,4 +29,8 @@ Object.toType = function(obj) {
         redirectTo: '/collect'
       });
   }]);
+
+  angular.toType = function(obj) {
+    return ({}).toString.call(obj).match(/\s([a-z|A-Z]+)/)[1].toLowerCase();
+  };
 })();
