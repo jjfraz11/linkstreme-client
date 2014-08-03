@@ -6,7 +6,7 @@
 
   function DiscoverCtrl($scope, Data, Shared){
     var loadCurrentStreme = function() {
-      Shared.load('currentStreme', function(currentStreme) {
+      Shared.get('currentStreme', function(currentStreme) {
         $scope.currentStreme = currentStreme;
       });
     };
@@ -20,7 +20,7 @@
         }, function(message) { alert(message); });
     };
 
-    Shared.register($scope, 'stremeLinks.update', function(event, links) {
+    Shared.register($scope, 'currentStreme.links.update', function(event, links) {
       loadCurrentStreme();
     });
 
