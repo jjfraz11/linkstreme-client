@@ -85,12 +85,15 @@
 
       EntityTagStore.findByEntityId(link_id, 'link').
         then(function(foundEntityTags) {
+          alert('Found ETags: ' + JSON.stringify(foundEntityTags));
           var getTagPromises = foundEntityTags.map(function(entityTag) {
             TagStore.get(entityTag.tag_id);
           });
+          alert('Tag Promises: ' + JSON.stringify(getTagPromises));
           return $q.all(getTagPromises);
         }, function(message) { deferred.reject(message); }).
         then(function(foundTags) {
+          alert('Found tags: ' + JSON.stringify(foundTags));
           deferred.resolve(foundTags);
         }, function(message) { deferred.reject(message); });
 

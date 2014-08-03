@@ -84,10 +84,6 @@
       };
 
       return {
-        currentStreme: stateHash.currentStreme,
-        stremeLinks: stateHash.stremeLinks,
-        linkTags: stateHash.linkTags,
-
         get: get,
         set: set,
 
@@ -117,19 +113,23 @@
 
     // TODO: This should only update the streme with streme_id
     var updateStremeLinks = function(streme_id) {
+      alert('Shared: Update Streme Links');
       return Data.findLinksByStremeId(streme_id).
         then(function(foundLinks) {
-          state.set(['currentStreme','links'], foundLinks);
-          return state.save('currentStreme');
-        });
+          if(foundLinks) {
+            state.set(['currentStreme','links'], foundLinks);
+            return state.save('currentStreme');
+          }
+        }, function(message) { alert(message); });
     };
 
     var updateLinkTags = function(link_id) {
+      alert('Shared: Update Link Tags');
       return Data.findTagsByLinkId(link_id).
         then(function(foundTags) {
-          if(foundTags) {
-            alert('Tags for ' + link_id + ' : ' + JSON.stringify(foundTags));
-            angular.forEach(state.currentStreme.links, function(link, index) {
+          alert('Tags for ' + link_id + ' : ' + JSON.stringify(foundTags));
+          if(foundTags.length > 0) {
+            angular.forEach(state.get(['currentStreme','links']), function(link, index) {
               if(link.id === link_id) {
                 state.set(['currentStreme', 'links', index, 'tags'], foundTags);
                 return state.save('currentStreme');
@@ -145,7 +145,7 @@
     });
 
     register($rootScope, 'currentStreme.links.update', function(event, links) {
-      angular.forEach(links, function(link) {
+      angular.forEach(state.get(['currentStreme', 'links']), function(link) {
         if(link.id) { updateLinkTags(link.id); }
       });
     });
@@ -160,9 +160,12 @@
 
       register: register,
 
-      updateStremeLinks: function(streme_id) {
-        updateStremeLinks(streme_id || state.currentStreme.id)
-      }
+      updateStremeLinks: function() {
+        var streme_id = state.get('currentStreme').id;
+        return updateStremeLinks(streme_id)
+      },
+
+      updateLinkTags: updateLinkTags
 
     };
   }
