@@ -45,7 +45,9 @@
       var deferred = $q.defer();
 
       this.store.where('entity_id').equals(entity_id).
-        and(function(entityTag) { entityTag.entity_type == entity_type }).
+        and(function(entityTag) {
+          return ( entityTag.entity_type === entity_type )
+        }).
         toArray(function(foundEntityTags) {
           deferred.resolve(foundEntityTags);
         }).
