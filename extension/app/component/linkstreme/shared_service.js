@@ -105,7 +105,7 @@
     })();
 
     var register = function(scope, eventName, callback) {
-      scope.$on(eventName, function(event, data) {
+      return scope.$on(eventName, function(event, data) {
         callback(event, data);
       });
     };
@@ -131,8 +131,7 @@
           if(foundTags.length > 0) {
             angular.forEach(state.get(['currentStreme','links']), function(link, index) {
               if(link.id === link_id) {
-                state.set(['currentStreme', 'links', index, 'tags'], foundTags);
-                return state.save('currentStreme');
+                state.set(['linkTags', link_id], foundTags);
               }
             });
           }
