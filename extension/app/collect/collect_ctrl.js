@@ -8,21 +8,43 @@
   function CollectCtrl($scope, Data, Shared, Sessions, Tabs){
     var currentStreme;
 
+    var registerLinkTagUpdate = function(link_id) {
+      var eventBase = 'linkTags.' + link_id;
+      var eventStart = eventBase + '.update';
+      var eventEnd = eventBase + '.updated';
+
+      // Clear any previously registered event handler
+      $scope.$broadcast(eventEnd);
+
+      alert('Registered: ' + eventStart);
+      var deregister = Shared.register($scope, eventStart, function(event, linkTags) {
+        setActiveTabs();
+        $scope.$broadcast(eventEnd, linkTags);
+      });
+      $scope.$on(eventEnd, function() {
+        alert('Deregistered: ' + eventEnd);
+        deregister();
+      });
+    };
+
+    var registerLinkTagUpdates = function(links) {
+      angular.forEach(links, function(link) {
+        registerLinkTagUpdate(link.id);
+      });
+    };
+
     var loadCurrentStreme = function() {
       Shared.get('currentStreme', function(streme) {
         currentStreme = streme;
       });
+      if (currentStreme.links) {
+        registerLinkTagUpdates(currentStreme.links);
+      }
       $scope.currentStreme = JSON.stringify(currentStreme);
     };
 
     // Set active tabs
     var setActiveTabs = function() {
-      var defaultTags = [
-        { name: 'one' },
-        { name: 'two' },
-        { name: 'three' }
-      ];
-
       Tabs.active().
         then(function(tabs) {
           $scope.activeTabs = [];
@@ -31,9 +53,15 @@
               angular.forEach(currentStreme.links, function(link) {
                 if(link.uri_url == tab.url) {
                   tab.link = link;
-                  tab.tags = link.tags || defaultTags;
                   tab.selected = true;
                   tab.saved = true;
+
+                  Shared.get(['linkTags', link.id], function(tags){
+                    if (tags) {
+                      tab.tags = tags;
+                      alert('Tab: ' + JSON.stringify(tab));
+                    }
+                  });
                 }
               });
             }
@@ -111,8 +139,11 @@
       };
       Data.saveEntityTag(entityTagData).
         then(function(entityTag) {
-          alert(JSON.stringify(entityTag));
-          Shared.updateLinkTags(entityTag.entity_id);
+          // registerLinkTagUpdate(entityTag.entity_id);
+          return Shared.updateLinkTags(entityTag.entity_id).
+            then(function() {
+              setActiveTabs();
+            });
         }, function(message) { alert(message); });
     };
 
