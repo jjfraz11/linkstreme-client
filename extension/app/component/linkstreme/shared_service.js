@@ -3,7 +3,7 @@
 (function(){
   angular.module('LS.services').
     factory('Shared.State', [ '$q', '$rootScope', 'Storage', SharedState ]).
-    factory('Shared', [ '$rootScope', 'Data', 'Shared.State', 'Storage', Shared ]);
+    factory('Shared', [ '$rootScope', 'Data', 'Shared.State', Shared ]);
 
   function SharedState($q, $rootScope, Storage) {
     var stateHash = {
@@ -103,7 +103,7 @@
     };
   }
 
-  function Shared($rootScope, Data, SharedState, Storage) {
+  function Shared($rootScope, Data, SharedState) {
     var register = function(scope, eventName, callback) {
       return scope.$on(eventName, function(event, data) {
         callback(event, data);
