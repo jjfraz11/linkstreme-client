@@ -2,14 +2,14 @@
 
 (function(){
   angular.module('LS.services').
-    factory('Shared.State', [ '$q', '$rootScope', 'Storage', SharedState ]).
-    factory('Shared', [ '$rootScope', 'Data', 'Shared.State', Shared ]);
+    factory('Shared.State', [ '$rootScope', 'Storage', SharedState ]).
+    factory('Shared', [ 'Data', 'Shared.State', Shared ]);
 
-  function SharedState($q, $rootScope, Storage) {
-    var stateHash = {
-      currentStreme: { id: null, name: 'Select Streme...', links: [] },
-      stremeLinks: [],
-      linkTags: { }
+  function SharedState($rootScope, Storage) {
+    var stateHash = {};
+
+    var init = function(hash) {
+      stateHash = hash;
     };
 
     var validKey = function(key) {
@@ -83,6 +83,7 @@
     };
 
     return {
+      init: init,
       get: get,
       set: set,
 
@@ -99,18 +100,19 @@
           then(function(data) {
             set(key, data);
           }, function(message) { alert(message); });
+      },
+
+      register: function(scope, eventName, callback) {
+        var bindScope = scope || $rootScope;
+        return bindScope.$on(eventName, function(event, data) {
+          callback(event, data);
+        });
       }
+
     };
   }
 
-  function Shared($rootScope, Data, SharedState) {
-    var register = function(scope, eventName, callback) {
-      return scope.$on(eventName, function(event, data) {
-        callback(event, data);
-      });
-    };
-
-
+  function Shared(Data, SharedState) {
     // TODO: This should only update the streme with streme_id
     var updateStremeLinks = function(streme_id) {
       alert('Shared: Update Streme Links');
@@ -138,12 +140,18 @@
         });
     };
 
+    SharedState.init({
+      currentStreme: { id: null, name: 'Select Streme...', links: [] },
+      stremeLinks: [],
+      linkTags: { }
+    });
+
     // Register callback to update links when currentStreme updated.
-    register($rootScope, 'currentStreme.update', function(event, streme) {
+    SharedState.register(null, 'currentStreme.update', function(event, streme) {
       if(streme.id) { updateStremeLinks(streme.id); }
     });
 
-    register($rootScope, 'currentStreme.links.update', function(event, links) {
+    SharedState.register(null, 'currentStreme.links.update', function(event, links) {
       angular.forEach(SharedState.get(['currentStreme', 'links']), function(link) {
         if(link.id) { updateLinkTags(link.id); }
       });
@@ -156,8 +164,7 @@
 
       get: SharedState.get,
       set: SharedState.set,
-
-      register: register,
+      register: SharedState.register,
 
       updateStremeLinks: function() {
         var streme_id = SharedState.get('currentStreme').id;
