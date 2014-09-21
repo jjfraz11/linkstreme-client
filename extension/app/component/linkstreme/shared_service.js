@@ -7,7 +7,7 @@
   function Shared(Data, State) {
     // TODO: This should only update the streme with streme_id
     var updateStremeLinks = function(streme_id) {
-      alert('Shared: Update Streme Links');
+      console.log('Shared: Update Links for Streme: ' + streme_id);
       return Data.findLinksByStremeId(streme_id).
         then(function(foundLinks) {
           if(foundLinks) {
@@ -18,7 +18,7 @@
     };
 
     var updateLinkTags = function(link_id) {
-      alert('Shared: Update Link Tags');
+      console.log('Shared: Update Tags for Link: ' + link_id);
       return Data.findTagsByLinkId(link_id).
         then(function(foundTags) {
           alert('Tags for ' + link_id + ' : ' + JSON.stringify(foundTags));

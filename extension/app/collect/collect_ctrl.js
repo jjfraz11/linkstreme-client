@@ -142,6 +142,7 @@
           // registerLinkTagUpdate(entityTag.entity_id);
           return Shared.updateLinkTags(entityTag.entity_id).
             then(function() {
+	      alert('added tag');
               setActiveTabs();
             });
         }, function(message) { alert(message); });
@@ -158,7 +159,7 @@
       setActiveTabs();
     });
 
-    loadCurrentStreme()
-    setActiveTabs();
+    // loadCurrentStreme()
+    // setActiveTabs();
   }
 })();
