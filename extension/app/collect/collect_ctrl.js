@@ -8,36 +8,9 @@
   function CollectCtrl($scope, Data, Shared, Sessions, Tabs){
     var loadCurrentStreme = function() {
       Shared.get('currentStreme', function(streme) {
-        alert('Streme on load: ' + JSON.stringify(streme));
 	$scope.currentStreme = streme;
       });
     };
-
-    // var registerLinkTagUpdate = function(link_id) {
-    //   var eventBase = 'linkTags.' + link_id;
-    //   var eventStart = eventBase + '.update';
-    //   var eventEnd = eventBase + '.updated';
-
-    //   // Clear any previously registered event handler
-    //   $scope.$broadcast(eventEnd);
-
-    //   alert('Registered: ' + eventStart);
-    //   var deregister = Shared.register($scope, eventStart, function(event, linkTags) {
-    //     setActiveTabs();
-    //     $scope.$broadcast(eventEnd, linkTags);
-    //   });
-    //   $scope.$on(eventEnd, function() {
-    //     alert('Deregistered: ' + eventEnd);
-    //     deregister();
-    //   });
-    // };
-
-    // var registerLinkTagUpdates = function(links) {
-    //   angular.forEach(links, function(link) {
-    //     registerLinkTagUpdate(link.id);
-    //   });
-    // };
-
 
     // Set active tabs
     var setActiveTabs = function() {
@@ -64,6 +37,8 @@
 	});
       }, function(message) { alert(message); });
     };
+
+
 
 
     // UI Controls
@@ -154,8 +129,5 @@
       loadCurrentStreme();
       setActiveTabs();
     });
-
-    // loadCurrentStreme()
-    // setActiveTabs();
   }
 })();
