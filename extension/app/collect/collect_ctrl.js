@@ -6,75 +6,71 @@
                [ '$scope', 'Data', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]);
 
   function CollectCtrl($scope, Data, Shared, Sessions, Tabs){
-    var currentStreme;
-
-    var registerLinkTagUpdate = function(link_id) {
-      var eventBase = 'linkTags.' + link_id;
-      var eventStart = eventBase + '.update';
-      var eventEnd = eventBase + '.updated';
-
-      // Clear any previously registered event handler
-      $scope.$broadcast(eventEnd);
-
-      alert('Registered: ' + eventStart);
-      var deregister = Shared.register($scope, eventStart, function(event, linkTags) {
-        setActiveTabs();
-        $scope.$broadcast(eventEnd, linkTags);
-      });
-      $scope.$on(eventEnd, function() {
-        alert('Deregistered: ' + eventEnd);
-        deregister();
-      });
-    };
-
-    var registerLinkTagUpdates = function(links) {
-      angular.forEach(links, function(link) {
-        registerLinkTagUpdate(link.id);
-      });
-    };
-
     var loadCurrentStreme = function() {
       Shared.get('currentStreme', function(streme) {
-        currentStreme = streme;
+        alert('Streme on load: ' + JSON.stringify(streme));
+	$scope.currentStreme = streme;
       });
-      if (currentStreme.links) {
-        registerLinkTagUpdates(currentStreme.links);
-      }
-      $scope.currentStreme = JSON.stringify(currentStreme);
     };
+
+    // var registerLinkTagUpdate = function(link_id) {
+    //   var eventBase = 'linkTags.' + link_id;
+    //   var eventStart = eventBase + '.update';
+    //   var eventEnd = eventBase + '.updated';
+
+    //   // Clear any previously registered event handler
+    //   $scope.$broadcast(eventEnd);
+
+    //   alert('Registered: ' + eventStart);
+    //   var deregister = Shared.register($scope, eventStart, function(event, linkTags) {
+    //     setActiveTabs();
+    //     $scope.$broadcast(eventEnd, linkTags);
+    //   });
+    //   $scope.$on(eventEnd, function() {
+    //     alert('Deregistered: ' + eventEnd);
+    //     deregister();
+    //   });
+    // };
+
+    // var registerLinkTagUpdates = function(links) {
+    //   angular.forEach(links, function(link) {
+    //     registerLinkTagUpdate(link.id);
+    //   });
+    // };
+
 
     // Set active tabs
     var setActiveTabs = function() {
-      Tabs.active().
-        then(function(tabs) {
-          $scope.activeTabs = [];
-          angular.forEach(tabs, function(tab) {
-            if(currentStreme.hasOwnProperty('links')) {
-              angular.forEach(currentStreme.links, function(link) {
-                if(link.uri_url == tab.url) {
-                  tab.link = link;
-                  tab.selected = true;
-                  tab.saved = true;
+      var checkStremeLinks = $scope.currentStreme.hasOwnProperty('links');
+      $scope.activeTabs    = [];
 
-                  Shared.get(['linkTags', link.id], function(tags){
-                    if (tags) {
-                      tab.tags = tags;
-                      alert('Tab: ' + JSON.stringify(tab));
-                    }
-                  });
-                }
-              });
-            }
-            $scope.activeTabs.push(tab);
-          });
-        }, function(message) { alert(message); });
+      var setupTab = function(tab, link) {
+	if( tab.url == link.uri_url ) {
+	  // TODO: Are both of these needed?
+          tab.saved    = true;
+          tab.selected = true;
+          tab.link     = link;
+	}
+      };
+
+      Tabs.active().then(function(tabs) {
+	angular.forEach(tabs, function(tab) {
+	  if(checkStremeLinks) {
+	    angular.forEach($scope.currentStreme.links, function(link) {
+	      if (!tab.link) { setupTab(tab, link); }
+	    });
+	  }
+	  $scope.activeTabs.push(tab);
+	});
+      }, function(message) { alert(message); });
     };
+
 
     // UI Controls
     $scope.name = 'CollectCtrl';
 
-    $scope.saveStreme = function() {
-      if (!currentStreme.id) {
+    $scope.updateStreme = function() {
+      if (!$scope.currentStreme.id) {
         alert('No streme selected.');
       } else {
         var linkDataToSave = [];
@@ -89,7 +85,7 @@
           } else {
             // Save selected links not currently saved
             if(tab.selected) {
-              var linkData = { streme: currentStreme, url: tab.url };
+              var linkData = { streme: $scope.currentStreme, url: tab.url };
               linkDataToSave.push(linkData);
             }
           }
