@@ -7,10 +7,10 @@
   <button type="button" class="btn btn-default"
           ng-click="resetDatabase()">Reset Database</button>
 
-  <br /><span ng-repeat="link_id in currentStreme.links">
-    {{ link_id + ' : ' }}
+  <br /><span ng-repeat="link in currentStreme.links">
+    {{ link.id + ' : ' }}
   </span>
-  <br /><input type="text" ng-model="currentStreme"></input>
+  <br /><input type="text" ng-model="currentStremeJson"></input>
 
   <accordion>
     <div ng-repeat="tab in activeTabs">

@@ -9,6 +9,7 @@
     var loadCurrentStreme = function() {
       Shared.get('currentStreme', function(streme) {
 	$scope.currentStreme = streme;
+	$scope.currentStremeJson = JSON.stringify($scope.currentStreme);
       });
     };
 
@@ -108,7 +109,10 @@
           type: 'link'
         }
       };
-      Data.saveEntityTag(entityTagData).
+
+      alert(JSON.stringify(entityTagData));
+
+      return Data.saveEntityTag(entityTagData).
         then(function(entityTag) {
           // registerLinkTagUpdate(entityTag.entity_id);
           return Shared.updateLinkTags(entityTag.entity_id).
@@ -129,5 +133,8 @@
       loadCurrentStreme();
       setActiveTabs();
     });
+
+    loadCurrentStreme();
+    setActiveTabs();
   }
 })();
