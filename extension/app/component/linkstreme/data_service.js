@@ -40,22 +40,22 @@
       return $q.all(savePromises);
     };
 
-    var removeLink = function(link_id) {
+    var deleteLink = function(link_id) {
       return LinkStore.delete(link_id);
     };
 
-    var removeLinks = function(linkIdArray) {
-      var removePromises = linkIdArray.map(function(link_id) {
-        return removeLink(link_id);
+    var deleteLinks = function(linkIdArray) {
+      var deletePromises = linkIdArray.map(function(link_id) {
+        return deleteLink(link_id);
       });
 
-      return $q.all(removePromises);
+      return $q.all(deletePromises);
     };
 
-    var updateStreme = function(linkDataToSave, linkIdsToRemove) {
+    var updateStreme = function(stremeUpdates) {
       var updatePromises = {
-        saved: saveLinks(linkDataToSave),
-        deleted: removeLinks(linkIdsToRemove)
+        saved:   saveLinks(stremeUpdates.linkDataToSave),
+        deleted: deleteLinks(stremeUpdates.linkIdsToDelete)
       };
 
       return $q.all(updatePromises);
@@ -125,8 +125,8 @@
     return {
       saveLink:  saveLink,
       saveLinks: saveLinks,
-      removeLink: removeLink,
-      removeLinks: removeLinks,
+      deleteLink: deleteLink,
+      deleteLinks: deleteLinks,
       updateStreme: updateStreme,
 
       saveStreme: saveStreme,
