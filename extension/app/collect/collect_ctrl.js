@@ -3,9 +3,9 @@
 (function(){
     angular.module('LS.controllers').
 	controller('CollectCtrl',
-		   [ '$scope', 'Data', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]);
+		   [ '$scope', '$timeout', 'Data', 'Shared', 'Sessions', 'Tabs', CollectCtrl ]);
 
-    function CollectCtrl($scope, Data, Shared, Sessions, Tabs){
+    function CollectCtrl($scope, $timeout, Data, Shared, Sessions, Tabs){
 	var loadCurrentStreme = function() {
 	    Shared.get('currentStreme', function(streme) {
 		$scope.currentStreme = streme;
@@ -89,14 +89,17 @@
 	    $event.stopPropagation();
 	    tab.selected = !tab.selected;
 	    tab.changed = !tab.changed;
-	}
+	};
 
 	$scope.closeTab = function(tab_id, $event) {
 	    // Disable click event for close tab element
 	    $event.stopPropagation();
+
 	    Tabs.remove(tab_id).
-		then(function(tab_id) { setActiveTabs(); });
-	}
+		then(function(tab_id) {
+		    $timeout(setActiveTabs, 1);
+		});
+	};
 
 	$scope.addTag = function(tab) {
 	    if (!tab.link.id) {
@@ -105,7 +108,7 @@
 
 	    var entityTagData = {
 		tag: {
-		    name: tab.new_tag_name,
+		    name: tab.new_tag_name
 		},
 		entity: {
 		    id: tab.link.id,
