@@ -1,81 +1,98 @@
- 'use strict';
+'use strict';
 
 (function(){
-  angular.module("LS.chrome").
-    factory('Tabs', [ '$q', 'Uri', ChromeTabs ]);
+    angular.module("LS.chrome").
+	factory('Tabs', [ '$q', 'Uri', ChromeTabs ]);
 
-  function ChromeTabs($q, Uri) {
-    // Return standard tab object
-    var newTab = function(tabData) {
-      return {
-        tab_id:   tabData.id,
-        index:    tabData.index + 1,
-        title:    tabData.title,
-        url:      Uri.normalize(tabData.url),
-        tags:     [],
+    function ChromeTabs($q, Uri) {
+	// Return standard tab object
+	var getTabData = function(tab) {
+	    return {
+		tab_id:   tab.id,
+		index:    tab.index + 1,
+		title:    tab.title,
+		url:      Uri.normalize(tab.url),
+		tags:     [],
 
-        active:   tabData.highlighted,
-        changed:  false,
-        saved:    false,
-        selected: false
-      };
-    }
+		active:   tab.highlighted,
+		changed:  false,
+		saved:    false,
+		selected: false
+	    };
+	};
 
-    return {
-      active: function() {
-        var queryParams = {
-          'lastFocusedWindow': true
-        };
-        var deferred = $q.defer();
-        var activeTabs = [];
+	function getActiveTabs()  {
+            var queryParams = {
+		'lastFocusedWindow': true
+            };
+            var deferred = $q.defer();
+            var activeTabs = [];
 
-        chrome.tabs.query(queryParams, function(tabs){
-          if(tabs) {
-            angular.forEach(tabs, function(tabData) {
-              activeTabs.push(newTab(tabData));
+            chrome.tabs.query(queryParams, function(tabs){
+		if(tabs) {
+		    angular.forEach(tabs, function(tab) {
+			activeTabs.push(getTabData(tab));
+		    });
+		    deferred.resolve(activeTabs);
+		} else {
+		    deferred.reject('Tabs ' + JSON.stringify(tabs) + ' is not valid.');
+		}
             });
-            deferred.resolve(activeTabs);
-          } else {
-            deferred.reject('Tabs ' + tabs + ' is not valid.');
-          }
-        });
 
-        return deferred.promise;
-      },
+            return deferred.promise;
+	};
 
-      current: function() {
-        var queryParams = {
-          'active': true,
-          'lastFocusedWindow': true
-        };
-        var deferred = $q.defer();
+	function getCurrentTab() {
+	    var queryParams = {
+		'active': true,
+		'lastFocusedWindow': true
+	    };
+	    var deferred = $q.defer();
 
-        chrome.tabs.query(queryParams, function(tabs){
-          var tab = tabs[0];
-          if(tab) {
-            console.log(tab.url);
-            deferred.resolve(tab);
-          } else {
-            deferred.reject('Tab ' + tab + ' is not valid.');
-          }
-        });
+	    chrome.tabs.query(queryParams, function(tabs){
+		var tab = tabs[0];
+		if(tab) {
+		    console.log(tab.url);
+		    deferred.resolve(tab);
+		} else {
+		    deferred.reject('Tab ' + JSON.stringify(tab) + ' is not valid.');
+		}
+	    });
 
-        return deferred.promise;
-      },
+	    return deferred.promise;
+	};
 
-      remove: function(tab_id) {
-        var deferred = $q.defer();
+	function createTab(createOptions) {
+	    var deferred = $q.defer();
 
-        chrome.tabs.remove(tab_id, function() {
-          deferred.resolve(tab_id);
-        });
+	    chrome.tabs.create(createOptions, function() {
+		deferred.resolve(true);
+	    });
 
-        return deferred.promise;
-      },
+	    return deferred.promise;
+	};
 
-      update: function(tab_id, options) {
-        chrome.tabs.update(tab_id, options);
-      }
-    };
-  }
+	function removeTab(tab_id) {
+	    var deferred = $q.defer();
+
+	    chrome.tabs.remove(tab_id, function() {
+		deferred.resolve(tab_id);
+	    });
+
+	    return deferred.promise;
+	};
+
+	function updateTab(tab_id, updateOptions) {
+	    chrome.tabs.update(tab_id, updateOptions);
+	};
+
+	return {
+	    active:  getActiveTabs,
+	    current: getCurrentTab,
+
+	    create: createTab,
+	    remove: removeTab,
+	    update: updateTab
+	};
+    }
 })();
