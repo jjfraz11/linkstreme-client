@@ -8,7 +8,9 @@
     var loadCurrentStreme = function() {
       Shared.get('currentStreme', function(currentStreme) {
         $scope.currentStreme = currentStreme;
-        alert('StremeSelect current: ' + JSON.stringify($scope.currentStreme));
+
+        if(angular.debug)
+	    alert('StremeSelect current: ' + JSON.stringify($scope.currentStreme));
       });
     };
 

@@ -77,7 +77,8 @@
       }
 
       var eventName = getKeyName(key) + '.update';
-      alert(eventName);
+      if(angular.debug) { alert(eventName); }
+
       $rootScope.$broadcast(eventName, data);
     };
 
