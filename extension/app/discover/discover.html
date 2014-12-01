@@ -2,7 +2,8 @@
   Hello Discover<br />
   <ul>
     <li ng-repeat="link in currentStreme.links">
-      {{ link.streme_id + ' - ' + link.uri_id + ' - ' + link.uri_url }}
+      {{ link.streme_id + ' - ' + link.uri_id + ' - ' }}
+      <a ng-click="openTab(link.uri_url)">{{ link.uri_url }}</a>
       <i class="glyphicon glyphicon-remove"
          tooltip="Remove Link" ng-click="removeLink(link.id);"></i>
     </li>
