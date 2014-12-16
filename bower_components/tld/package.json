@@ -1,0 +1,67 @@
+{
+  "author": "Thomas Parisot (https://oncletom.io)",
+  "name": "tldjs",
+  "description": "JavaScript API to work against complex domain names, subdomains and URIs.",
+  "version": "1.4.0",
+  "homepage": "https://github.com/oncletom/tld.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/oncletom/tld.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oncletom/tld.js/issues"
+  },
+  "engines": {
+    "node": "0.8.x || 0.10.x"
+  },
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "npm run lint && npm run test-node && npm run test-browser",
+    "lint": "jshint --config .jshintrc lib/**/*.js",
+    "test-node": "mocha --reporter dot",
+    "test-watch": "mocha --reporter dot --watch",
+    "test-browser": "testling",
+    "build": "node ./bin/update.js",
+    "prepublish": "npm run build"
+  },
+  "tldjs": {
+    "providers": {
+      "publicsuffix": "https://publicsuffix.org/list/effective_tld_names.dat"
+    }
+  },
+  "testling": {
+    "files": "test/*.js",
+    "harness": "mocha-bdd",
+    "browsers": [
+      "ie/7..10",
+      "ff/latest..nightly",
+      "chrome/latest..canary",
+      "opera/latest..next",
+      "safari/6.0",
+      "iphone/6.0",
+      "android/4.2"
+    ]
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "async": "^0.9.0",
+    "expect.js": "^0.3.1",
+    "jshint": "^2.5.1",
+    "mocha": "^1.19.0",
+    "optimist": "^0.6.1",
+    "request": "^2.36.0",
+    "testling": "^1.6.1"
+  },
+  "keywords": [
+    "tld",
+    "sld",
+    "domain",
+    "browser",
+    "uri",
+    "url",
+    "domain name",
+    "subdomain",
+    "public suffix"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "linkstreme-client",
+  "version": "0.0.0",
+  "homepage": "https://github.com/jjfraz11/linkstreme-client",
+  "authors": [
+    "Jonathan Frazier <jjfraz11@gmail.com>"
+  ],
+  "description": "Google Chrome Extension for Linkstreme Client",
+  "main": "\"extension/app/popup.html\"",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "1.2.9",
+    "angular-route": "1.2.9",
+    "bootstrap": "3.2.0",
+    "dexie": "1.0.2",
+    "jquery": "2.1.1",
+    "tld": "1.4.0",
+    "URIjs": "1.4.3"
+  }
+}

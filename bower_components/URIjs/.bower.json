@@ -1,0 +1,14 @@
+{
+  "name": "URIjs",
+  "homepage": "https://github.com/medialize/URI.js",
+  "version": "1.4.3",
+  "_release": "1.4.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.4.3",
+    "commit": "7ebfa21b1afa016e6f6fbb3cfe1d0edaa28426f4"
+  },
+  "_source": "git://github.com/medialize/URI.js.git",
+  "_target": "1.4.3",
+  "_originalSource": "URIjs"
+}
